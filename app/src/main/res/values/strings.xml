@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">DJAutocontrol</string>
+    <string name="action_settings">Settings</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="product_information">Product Information</string>
+    <string name="connection_loose">Status: No Product Connected</string>
+    <string name="sdk_version">DJI SDK Version: %1$s</string>
+    <string name="drone_status">Drone status</string>
+    <string name="camera_fpv">Camera FPV</string>
+    <string name="remote_control">Remote control</string>
+    <string name="auto_charge_">Auto charge</string>
+    <string name="copy_right">The Copyright of the Evil Fish Studio</string>
+</resources>
