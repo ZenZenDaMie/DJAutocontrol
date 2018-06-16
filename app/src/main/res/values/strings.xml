@@ -8,11 +8,12 @@
     <string name="drone_status">Drone status</string>
     <string name="camera_fpv">Camera</string>
     <string name="remote_control">Remote control</string>
-    <string name="gps_location">GPS location</string>
-    <string name="picture_location">Picture location</string>
-    <string name="moving_location">Moving location</string>
+    <string name="gps_track">GPS track</string>
+    <string name="static_track">Static track</string>
+    <string name="moving_track">Moving track</string>
     <string name="site_landing">Site landing</string>
     <string name="automatic_handle">Automatic</string>
     <string name="gps_map">GPS map view</string>
+    <string name="push_info">Push Info</string>
     <string name="copy_right">The Copyright of the Evil Fish Studio</string>
 </resources>

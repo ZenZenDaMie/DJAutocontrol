@@ -1,11 +1,11 @@
-package com.mrbluyee.djautocontrol;
+package com.mrbluyee.djautocontrol.utils;
 import android.support.annotation.Nullable;
 
 import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.flightcontroller.Simulator;
 import dji.sdk.products.Aircraft;
 import dji.sdk.products.HandHeld;
-
+import com.mrbluyee.djautocontrol.application.DJSDKApplication;
 /**
  * Created by dji on 16/1/6.
  */

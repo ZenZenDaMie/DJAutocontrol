@@ -1,4 +1,4 @@
-package com.mrbluyee.djautocontrol;
+package com.mrbluyee.djautocontrol.application;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -38,6 +38,7 @@ import dji.sdk.camera.VideoFeeder;
 import dji.sdk.codec.DJICodecManager;
 import dji.sdk.products.Aircraft;
 import dji.sdk.useraccount.UserAccountManager;
+import com.mrbluyee.djautocontrol.R;
 
 public class FPVActivity extends Activity implements SurfaceTextureListener{
 

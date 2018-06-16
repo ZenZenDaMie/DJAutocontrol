@@ -30,16 +30,22 @@
             android:text="@string/remote_control" />
 
         <Button
-            android:id="@+id/gps_location_button"
+            android:id="@+id/gps_track_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/gps_location" />
+            android:text="@string/gps_track" />
 
         <Button
-            android:id="@+id/picture_location_button"
+            android:id="@+id/static_track_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/picture_location" />
+            android:text="@string/static_track" />
+
+        <Button
+            android:id="@+id/moving_track_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/moving_track" />
 
         <Button
             android:id="@+id/site_landing_button"

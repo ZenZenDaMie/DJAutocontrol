@@ -1,5 +1,6 @@
-package com.mrbluyee.djautocontrol;
+package com.mrbluyee.djautocontrol.activity;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
@@ -19,6 +20,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Timer;
 import java.util.TimerTask;
+import com.mrbluyee.djautocontrol.application.FPVActivity;
+import com.mrbluyee.djautocontrol.application.DJSDKApplication;
+import com.mrbluyee.djautocontrol.utils.ModuleVerificationUtil;
+import com.mrbluyee.djautocontrol.R;
 
 public class CameraActivity extends FPVActivity implements TextureView.SurfaceTextureListener, View.OnClickListener,View.OnTouchListener {
     private static final String TAG = CameraActivity.class.getName();

@@ -1,4 +1,4 @@
-package com.mrbluyee.djautocontrol;
+package com.mrbluyee.djautocontrol.activity;
 
 import android.Manifest;
 import android.app.Activity;
@@ -29,6 +29,9 @@ import dji.log.DJILog;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
+
+import com.mrbluyee.djautocontrol.R;
+import com.mrbluyee.djautocontrol.application.DJSDKApplication;
 
 public class ConnectionActivity extends Activity implements View.OnClickListener {
 

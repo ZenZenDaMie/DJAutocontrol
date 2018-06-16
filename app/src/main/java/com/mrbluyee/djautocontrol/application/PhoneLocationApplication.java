@@ -1,4 +1,4 @@
-package com.mrbluyee.djautocontrol;
+package com.mrbluyee.djautocontrol.application;
 
 
 import android.Manifest;

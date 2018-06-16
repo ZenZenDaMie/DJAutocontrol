@@ -1,4 +1,4 @@
-package com.mrbluyee.djautocontrol;
+package com.mrbluyee.djautocontrol.application;
 import android.app.Application;
 import android.content.Context;
 import com.secneo.sdk.Helper;

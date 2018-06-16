@@ -1,4 +1,4 @@
-package com.mrbluyee.djautocontrol;
+package com.mrbluyee.djautocontrol.activity;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -55,6 +55,10 @@ import dji.sdk.mission.waypoint.WaypointMissionOperatorListener;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.sdk.useraccount.UserAccountManager;
+
+import com.mrbluyee.djautocontrol.R;
+import com.mrbluyee.djautocontrol.application.PhoneLocationApplication;
+import com.mrbluyee.djautocontrol.application.DJSDKApplication;
 
 public class MapActivity extends FragmentActivity implements View.OnClickListener, OnMapClickListener {
     protected static final String TAG = "MapActivity";
