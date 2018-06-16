@@ -18,6 +18,10 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+
 
     <uses-feature android:name="android.hardware.camera"/>
     <uses-feature android:name="android.hardware.camera.autofocus"/>
@@ -44,6 +48,10 @@
         <meta-data
             android:name="com.dji.sdk.API_KEY"
             android:value="19d10a169a7d0cdfc3720158" />
+        <!-- 启用高德地图服务 -->
+        <meta-data
+            android:name="com.amap.api.v2.apikey"
+            android:value="832fee765e57a3a30a653ca5cff1596f" />
         <activity
             android:name="dji.sdk.sdkmanager.DJIAoaControllerActivity"
             android:theme="@android:style/Theme.Translucent" >
@@ -61,6 +69,16 @@
             android:screenOrientation="landscape">
         </activity>
         <activity android:name=".MainActivity">
+        </activity>
+        <activity
+            android:name=".MapActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/gps_map"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        </activity>
+        <activity android:name=".CameraActivity"
+            android:screenOrientation="landscape">
         </activity>
         <activity android:name=".ConnectionActivity"
             android:configChanges="orientation"

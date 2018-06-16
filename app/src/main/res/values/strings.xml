@@ -6,8 +6,13 @@
     <string name="connection_loose">Status: No Product Connected</string>
     <string name="sdk_version">DJI SDK Version: %1$s</string>
     <string name="drone_status">Drone status</string>
-    <string name="camera_fpv">Camera FPV</string>
+    <string name="camera_fpv">Camera</string>
     <string name="remote_control">Remote control</string>
-    <string name="auto_charge_">Auto charge</string>
+    <string name="gps_location">GPS location</string>
+    <string name="picture_location">Picture location</string>
+    <string name="moving_location">Moving location</string>
+    <string name="site_landing">Site landing</string>
+    <string name="automatic_handle">Automatic</string>
+    <string name="gps_map">GPS map view</string>
     <string name="copy_right">The Copyright of the Evil Fish Studio</string>
 </resources>

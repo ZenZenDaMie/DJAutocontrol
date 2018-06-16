@@ -10,7 +10,7 @@ import android.view.View.OnClickListener;
 
 
 public class MainActivity extends Activity implements OnClickListener{
-    private Button drone_status_btn,camera_fpv_btn,remote_control_btn,auto_charge_btn;
+    private Button drone_status_btn,camera_fpv_btn,remote_control_btn,gps_location_btn,picture_location_btn,site_landing_btn,automatic_handle_btn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,12 +23,18 @@ public class MainActivity extends Activity implements OnClickListener{
         drone_status_btn = (Button) findViewById(R.id.drone_status_button);
         camera_fpv_btn = (Button) findViewById(R.id.camera_fpv_button);
         remote_control_btn = (Button) findViewById(R.id.remote_control_button);
-        auto_charge_btn = (Button) findViewById(R.id.auto_charge_button);
+        gps_location_btn = (Button) findViewById(R.id.gps_location_button);
+        picture_location_btn = (Button) findViewById(R.id.picture_location_button);
+        site_landing_btn = (Button) findViewById(R.id.site_landing_button);
+        automatic_handle_btn = (Button) findViewById(R.id.automatic_handle_button);
 
         drone_status_btn.setOnClickListener(this);
         camera_fpv_btn.setOnClickListener(this);
         remote_control_btn.setOnClickListener(this);
-        auto_charge_btn.setOnClickListener(this);
+        gps_location_btn.setOnClickListener(this);
+        picture_location_btn.setOnClickListener(this);
+        site_landing_btn.setOnClickListener(this);
+        automatic_handle_btn.setOnClickListener(this);
     }
 
     @Override
@@ -39,7 +45,7 @@ public class MainActivity extends Activity implements OnClickListener{
                 break;
             }
             case R.id.camera_fpv_button:{
-                Intent intent = new Intent(this, FPVActivity.class);
+                Intent intent = new Intent(this, CameraActivity.class);
                 startActivity(intent);
                 break;
             }
@@ -47,7 +53,20 @@ public class MainActivity extends Activity implements OnClickListener{
 
                 break;
             }
-            case R.id.auto_charge_button:{
+            case R.id.gps_location_button:{
+                Intent intent = new Intent(this, MapActivity.class);
+                startActivity(intent);
+                break;
+            }
+            case R.id.picture_location_button:{
+
+                break;
+            }
+            case R.id.site_landing_button:{
+
+                break;
+            }
+            case R.id.automatic_handle_button:{
 
                 break;
             }

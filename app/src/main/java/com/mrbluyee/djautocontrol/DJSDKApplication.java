@@ -19,7 +19,7 @@ import dji.sdk.products.Aircraft;
 import dji.sdk.products.HandHeld;
 import dji.sdk.sdkmanager.DJISDKManager;
 
-public class FPVDemoApplication extends Application{
+public class DJSDKApplication extends Application{
 
     public static final String FLAG_CONNECTION_CHANGE = "fpv_tutorial_connection_change";
 
@@ -40,7 +40,7 @@ public class FPVDemoApplication extends Application{
         return instance;
     }
 
-    public FPVDemoApplication() {
+    public DJSDKApplication() {
 
     }
 
