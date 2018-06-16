@@ -17,6 +17,7 @@ import dji.sdk.base.BaseProduct;
 import dji.sdk.camera.Camera;
 import dji.sdk.products.Aircraft;
 import dji.sdk.products.HandHeld;
+import dji.sdk.sdkmanager.BluetoothProductConnector;
 import dji.sdk.sdkmanager.DJISDKManager;
 
 public class DJSDKApplication extends Application{
@@ -26,6 +27,7 @@ public class DJSDKApplication extends Application{
     private DJISDKManager.SDKManagerCallback mDJISDKManagerCallback;
     private BaseProduct.BaseProductListener mDJIBaseProductListener;
     private BaseComponent.ComponentListener mDJIComponentListener;
+    private static BluetoothProductConnector bluetoothConnector = null;
     private static BaseProduct mProduct;
     public Handler mHandler;
 
@@ -69,6 +71,27 @@ public class DJSDKApplication extends Application{
         }
 
         return camera;
+    }
+    public static synchronized BluetoothProductConnector getBluetoothProductConnector() {
+        if (null == bluetoothConnector) {
+            bluetoothConnector = DJISDKManager.getInstance().getBluetoothProductConnector();
+        }
+        return bluetoothConnector;
+    }
+
+    public static boolean isAircraftConnected() {
+        return getProductInstance() != null && getProductInstance() instanceof Aircraft;
+    }
+
+    public static boolean isHandHeldConnected() {
+        return getProductInstance() != null && getProductInstance() instanceof HandHeld;
+    }
+
+    public static synchronized Aircraft getAircraftInstance() {
+        if (!isAircraftConnected()) {
+            return null;
+        }
+        return (Aircraft) getProductInstance();
     }
 
     @Override

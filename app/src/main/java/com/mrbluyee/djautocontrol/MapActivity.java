@@ -24,6 +24,7 @@ import com.amap.api.maps2d.AMap;
 import com.amap.api.maps2d.AMap.OnMapClickListener;
 import com.amap.api.maps2d.CameraUpdate;
 import com.amap.api.maps2d.CameraUpdateFactory;
+import com.amap.api.maps2d.CoordinateConverter;
 import com.amap.api.maps2d.MapView;
 import com.amap.api.maps2d.model.BitmapDescriptorFactory;
 import com.amap.api.maps2d.model.LatLng;
@@ -137,15 +138,16 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
     }
 
     private void initMapView() {
-
+        float zoomlevel = (float) 18.0;
         if (aMap == null) {
             aMap = mapView.getMap();
             aMap.setOnMapClickListener(this);// add the listener for click for amap object
         }
-
-        LatLng shenzhen = new LatLng(22.5362, 113.9454);
-        aMap.addMarker(new MarkerOptions().position(shenzhen).title("Marker in Shenzhen"));
-        aMap.moveCamera(CameraUpdateFactory.newLatLng(shenzhen));
+        PhoneLocationApplication.initLocation(this);
+        LatLng phone_location = gps_converter(new LatLng(PhoneLocationApplication.latitude, PhoneLocationApplication.longitude));
+        aMap.addMarker(new MarkerOptions().position(phone_location).title("phone marker"));
+        CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(phone_location , zoomlevel);
+        aMap.moveCamera(cu);
     }
 
     @Override
@@ -164,6 +166,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
         initMapView();
         initUI();
         addListener();
+        initFlightController();
 
     }
 
@@ -215,6 +218,8 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
                                                      djiFlightControllerCurrentState) {
                             droneLocationLat = djiFlightControllerCurrentState.getAircraftLocation().getLatitude();
                             droneLocationLng = djiFlightControllerCurrentState.getAircraftLocation().getLongitude();
+                            Log.e(TAG, "getLatitude:"+ droneLocationLat );
+                            Log.e(TAG, "getLongitude:"+ droneLocationLng );
                             updateDroneLocation();
                         }
                     });
@@ -296,7 +301,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
     // Update the drone location based on states from MCU.
     private void updateDroneLocation(){
 
-        LatLng pos = new LatLng(droneLocationLat, droneLocationLng);
+        LatLng pos = gps_converter(new LatLng(droneLocationLat, droneLocationLng));
         //Create MarkerOptions object
         final MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(pos);
@@ -372,7 +377,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
     }
 
     private void cameraUpdate(){
-        LatLng pos = new LatLng(droneLocationLat, droneLocationLng);
+        LatLng pos = gps_converter(new LatLng(droneLocationLat, droneLocationLng));
         float zoomlevel = (float) 18.0;
         CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(pos, zoomlevel);
         aMap.moveCamera(cu);
@@ -561,6 +566,16 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
             }
         });
 
+    }
+
+    private LatLng gps_converter(LatLng sourceLatLng){
+        CoordinateConverter converter  = new CoordinateConverter();
+        // CoordType.GPS 待转换坐标类型
+        converter.from(CoordinateConverter.CoordType.GPS);
+        // sourceLatLng待转换坐标点 DPoint类型
+        converter.coord(sourceLatLng);
+        // 执行转换操作
+        return converter.convert();
     }
 
 }
