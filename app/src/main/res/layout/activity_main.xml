@@ -36,6 +36,12 @@
             android:text="@string/gps_track" />
 
         <Button
+            android:id="@+id/gps_route_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/gps_route" />
+
+        <Button
             android:id="@+id/static_track_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

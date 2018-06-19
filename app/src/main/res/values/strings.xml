@@ -9,6 +9,7 @@
     <string name="camera_fpv">Camera</string>
     <string name="remote_control">Remote control</string>
     <string name="gps_track">GPS track</string>
+    <string name="gps_route">GPS route</string>
     <string name="static_track">Static track</string>
     <string name="moving_track">Moving track</string>
     <string name="site_landing">Site landing</string>

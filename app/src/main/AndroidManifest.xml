@@ -66,19 +66,32 @@
         </service>
         <!-- DJI SDK -->
         <activity android:name=".application.FPVActivity"
-            android:screenOrientation="landscape">
-        </activity>
-        <activity android:name=".activity.MainActivity">
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
         </activity>
         <activity
-            android:name=".activity.MapActivity"
+            android:name=".activity.MainActivity"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
+            android:name=".activity.WaypointActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/gps_map"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        </activity>
+        <activity
+            android:name=".activity.FollowmeActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/gps_map"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
         </activity>
         <activity android:name=".activity.CameraActivity"
-            android:screenOrientation="landscape">
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
         </activity>
         <activity android:name=".activity.ConnectionActivity"
             android:configChanges="orientation"
@@ -93,6 +106,7 @@
             android:label="@string/static_track"
             android:launchMode="singleInstance"
             android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize"
             android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
         </activity>
         <activity
@@ -100,6 +114,7 @@
             android:label="@string/moving_track"
             android:launchMode="singleInstance"
             android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize"
             android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
         </activity>
     </application>

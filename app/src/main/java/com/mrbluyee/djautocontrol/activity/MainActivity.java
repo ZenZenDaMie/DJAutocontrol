@@ -22,6 +22,7 @@ public class MainActivity extends Activity implements OnClickListener{
     private Button camera_fpv_btn;
     private Button remote_control_btn;
     private Button gps_track_btn;
+    private Button gps_route_btn;
     private Button static_track_btn;
     private Button moving_track_btn;
     private Button site_landing_btn;
@@ -45,6 +46,7 @@ public class MainActivity extends Activity implements OnClickListener{
         camera_fpv_btn = (Button) findViewById(R.id.camera_fpv_button);
         remote_control_btn = (Button) findViewById(R.id.remote_control_button);
         gps_track_btn = (Button) findViewById(R.id.gps_track_button);
+        gps_route_btn = (Button) findViewById(R.id.gps_route_button);
         static_track_btn = (Button) findViewById(R.id.static_track_button);
         moving_track_btn = (Button) findViewById(R.id.moving_track_button);
         site_landing_btn = (Button) findViewById(R.id.site_landing_button);
@@ -54,6 +56,7 @@ public class MainActivity extends Activity implements OnClickListener{
         camera_fpv_btn.setOnClickListener(this);
         remote_control_btn.setOnClickListener(this);
         gps_track_btn .setOnClickListener(this);
+        gps_route_btn.setOnClickListener(this);
         static_track_btn.setOnClickListener(this);
         moving_track_btn.setOnClickListener(this);
         site_landing_btn.setOnClickListener(this);
@@ -77,7 +80,12 @@ public class MainActivity extends Activity implements OnClickListener{
                 break;
             }
             case R.id.gps_track_button:{
-                Intent intent = new Intent(this, MapActivity.class);
+                Intent intent = new Intent(this, FollowmeActivity.class);
+                startActivity(intent);
+                break;
+            }
+            case R.id.gps_route_button:{
+                Intent intent = new Intent(this, WaypointActivity.class);
                 startActivity(intent);
                 break;
             }

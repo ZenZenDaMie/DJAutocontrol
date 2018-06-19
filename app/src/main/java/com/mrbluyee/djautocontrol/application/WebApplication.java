@@ -23,25 +23,43 @@ public class WebApplication {
         return outStream.toByteArray();
     }
 
-    public static String http_get(String path) throws Exception {
-        URL url = new URL(path);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setConnectTimeout(5000);
-        conn.setRequestMethod("GET");
-        if (conn.getResponseCode() == 200) {
-            InputStream in = conn.getInputStream();
-            byte[] data = read(in);
-            String get_data = new String(data, "UTF-8");
-            return get_data;
+    public static String http_get(String path){
+        String get_data = null;
+        URL url = null;
+        InputStream in = null;
+        HttpURLConnection connection = null;
+        try {
+            url = new URL(path);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setConnectTimeout(5000);
+            connection.setRequestMethod("GET");
+            if (connection.getResponseCode() == 200) {
+                in = connection.getInputStream();
+                byte[] data = read(in);
+                get_data = new String(data, "UTF-8");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-        return null;
+        return get_data;
     }
 
     public static String http_post(String path,String post_data){
         String result = null;
         URL url = null;
         HttpURLConnection connection = null;
-        InputStreamReader in = null;
+        InputStream in = null;
         try {
             url = new URL(path);
             connection = (HttpURLConnection) url.openConnection();
@@ -55,14 +73,9 @@ public class WebApplication {
             dop.flush();
             dop.close();
 
-            in = new InputStreamReader(connection.getInputStream());
-            BufferedReader bufferedReader = new BufferedReader(in);
-            StringBuffer strBuffer = new StringBuffer();
-            String line = null;
-            while ((line = bufferedReader.readLine()) != null) {
-                strBuffer.append(line);
-            }
-            result = strBuffer.toString();
+            in = connection.getInputStream();
+            byte[] data = read(in);
+            result = new String(data, "UTF-8");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

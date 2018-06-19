@@ -59,9 +59,10 @@ import dji.sdk.useraccount.UserAccountManager;
 import com.mrbluyee.djautocontrol.R;
 import com.mrbluyee.djautocontrol.application.PhoneLocationApplication;
 import com.mrbluyee.djautocontrol.application.DJSDKApplication;
+import com.mrbluyee.djautocontrol.utils.AmapToGpsUtil;
 
-public class MapActivity extends FragmentActivity implements View.OnClickListener, OnMapClickListener {
-    protected static final String TAG = "MapActivity";
+public class WaypointActivity extends FragmentActivity implements View.OnClickListener, OnMapClickListener {
+    protected static final String TAG = WaypointActivity.class.getName();
 
     private MapView mapView;
     private AMap aMap;
@@ -113,10 +114,10 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
     }
 
     private void setResultToToast(final String string){
-        MapActivity.this.runOnUiThread(new Runnable() {
+        WaypointActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(MapActivity.this, string, Toast.LENGTH_SHORT).show();
+                Toast.makeText(WaypointActivity.this, string, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -148,7 +149,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
             aMap.setOnMapClickListener(this);// add the listener for click for amap object
         }
         PhoneLocationApplication.initLocation(this);
-        LatLng phone_location = gps_converter(new LatLng(PhoneLocationApplication.latitude, PhoneLocationApplication.longitude));
+        LatLng phone_location = AmapToGpsUtil.gps_converter(new LatLng(PhoneLocationApplication.latitude, PhoneLocationApplication.longitude));
         aMap.addMarker(new MarkerOptions().position(phone_location).title("phone marker"));
         CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(phone_location , zoomlevel);
         aMap.moveCamera(cu);
@@ -158,7 +159,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_map);
+        setContentView(R.layout.activity_waypoint);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(DJSDKApplication.FLAG_CONNECTION_CHANGE);
@@ -222,8 +223,6 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
                                                      djiFlightControllerCurrentState) {
                             droneLocationLat = djiFlightControllerCurrentState.getAircraftLocation().getLatitude();
                             droneLocationLng = djiFlightControllerCurrentState.getAircraftLocation().getLongitude();
-                            Log.e(TAG, "getLatitude:"+ droneLocationLat );
-                            Log.e(TAG, "getLongitude:"+ droneLocationLng );
                             updateDroneLocation();
                         }
                     });
@@ -282,7 +281,8 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
     public void onMapClick(LatLng point) {
         if (isAdd == true){
             markWaypoint(point);
-            Waypoint mWaypoint = new Waypoint(point.latitude, point.longitude, altitude);
+            LatLng gps_point = AmapToGpsUtil.toGPSPoint(point.latitude, point.longitude);
+            Waypoint mWaypoint = new Waypoint(gps_point.latitude, gps_point.longitude, altitude);
             //Add Waypoints to Waypoint arraylist;
             if (waypointMissionBuilder != null) {
                 waypointList.add(mWaypoint);
@@ -305,7 +305,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
     // Update the drone location based on states from MCU.
     private void updateDroneLocation(){
 
-        LatLng pos = gps_converter(new LatLng(droneLocationLat, droneLocationLng));
+        LatLng pos = AmapToGpsUtil.gps_converter(new LatLng(droneLocationLat, droneLocationLng));
         //Create MarkerOptions object
         final MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(pos);
@@ -381,7 +381,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
     }
 
     private void cameraUpdate(){
-        LatLng pos = gps_converter(new LatLng(droneLocationLat, droneLocationLng));
+        LatLng pos = AmapToGpsUtil.gps_converter(new LatLng(droneLocationLat, droneLocationLng));
         float zoomlevel = (float) 18.0;
         CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(pos, zoomlevel);
         aMap.moveCamera(cu);
@@ -570,16 +570,6 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
             }
         });
 
-    }
-
-    private LatLng gps_converter(LatLng sourceLatLng){
-        CoordinateConverter converter  = new CoordinateConverter();
-        // CoordType.GPS 待转换坐标类型
-        converter.from(CoordinateConverter.CoordType.GPS);
-        // sourceLatLng待转换坐标点 DPoint类型
-        converter.coord(sourceLatLng);
-        // 执行转换操作
-        return converter.convert();
     }
 
 }
