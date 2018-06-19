@@ -8,6 +8,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -58,6 +61,9 @@ import dji.sdk.mission.followme.FollowMeMissionOperatorListener;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.sdk.useraccount.UserAccountManager;
+import dji.thirdparty.okhttp3.OkHttpClient;
+import dji.thirdparty.okhttp3.Request;
+import dji.thirdparty.okhttp3.Response;
 import dji.thirdparty.rx.Observable;
 import dji.thirdparty.rx.Subscription;
 import dji.thirdparty.rx.functions.Action1;
@@ -65,10 +71,12 @@ import dji.thirdparty.rx.schedulers.Schedulers;
 
 
 import com.mrbluyee.djautocontrol.R;
-import com.mrbluyee.djautocontrol.application.ChargeSiteApplication;
 import com.mrbluyee.djautocontrol.application.PhoneLocationApplication;
 import com.mrbluyee.djautocontrol.application.DJSDKApplication;
 import com.mrbluyee.djautocontrol.utils.AmapToGpsUtil;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 
 public class FollowmeActivity extends FragmentActivity implements View.OnClickListener, OnMapClickListener {
@@ -92,6 +100,8 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
     private AtomicBoolean isRunning = new AtomicBoolean(false);
     private Subscription timmerSubcription;
     private Observable<Long> timer =Observable.timer(100, TimeUnit.MILLISECONDS).observeOn(Schedulers.computation()).repeat();
+    private MyHandler myHandler;
+    private JSONArray station_gps_jsonArray = null;
 
     @Override
     protected void onResume(){
@@ -162,13 +172,48 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
         filter.addAction(DJSDKApplication.FLAG_CONNECTION_CHANGE);
         registerReceiver(mReceiver, filter);
 
-        mapView = (MapView) findViewById(R.id.map);
+        mapView = (MapView) findViewById(R.id.followme_map);
         mapView.onCreate(savedInstanceState);
 
         initMapView();
         initUI();
         addListener();
         initFlightController();
+        myHandler = new MyHandler();
+    }
+
+    class MyHandler extends Handler {
+        public MyHandler() {
+        }
+
+        public MyHandler(Looper L) {
+            super(L);
+        }
+        // 子类必须重写此方法，接受数据
+        @Override
+        public void handleMessage(Message msg) {
+            // TODO Auto-generated method stub
+            Log.d("MyHandler","handleMessage");
+            super.handleMessage(msg);
+            // 此处可以更新UI
+            Bundle b = msg.getData();
+            String station_gps_data = b.getString("getgps");
+            Log.d("MyHandler",station_gps_data);
+            try {
+                station_gps_jsonArray = new JSONArray(station_gps_data);
+                for (int i = 0; i< station_gps_jsonArray.length(); i++) {
+                    JSONObject jsonObject = station_gps_jsonArray.getJSONObject(i);
+                    int station_id = jsonObject.getInt("stationid");
+                    double station_lat = jsonObject.getDouble("lat");
+                    double station_lon = jsonObject.getDouble("lon");
+                    String station_create_time = jsonObject.getString("create_time");
+                    String station_update_time = jsonObject.getString("update_time");
+                    markchargesite(new LatLng(station_lat,station_lon),""+ station_id);
+                }
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     //Add Listener for WaypointMissionOperator
@@ -290,11 +335,12 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
         });
     }
 
-    private void markchargesite(LatLng point){
+    private void markchargesite(LatLng point,String title){
         //Create MarkerOptions object
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(point);
         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.charge_site));
+        markerOptions.title(title);
         Marker marker = aMap.addMarker(markerOptions);
         mMarkers.put(mMarkers.size(), marker);
     }
@@ -308,7 +354,7 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
                 break;
             }
             case R.id.followme_search:{
-               Log.d(TAG, "charge_site"+ ChargeSiteApplication.get_chargesite_gps_info());
+                Get_chargesite_gps_info();
                 break;
             }
             case R.id.followme_gosite:{
@@ -372,4 +418,33 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
         return converter.convert();
     }
 
+    public void Get_chargesite_gps_info(){
+        new Thread(new Runnable() {
+            String  url = "http://139.196.138.204/tp5/public/station/returngaodegps";
+            String result = null;
+            @Override
+            public void run() {
+                try {
+                    OkHttpClient client = new OkHttpClient();//创建OkHttpClient对象
+                    Request request = new Request.Builder()
+                            .url(url)//请求接口。如果需要传参拼接到接口后面。
+                            .build();//创建Request 对象
+                    Response response = null;
+                    response = client.newCall(request).execute();//得到Response 对象
+                    if (response.isSuccessful()) {
+                        Log.d("getgps","response.code()=="+response.code());
+                        Log.d("getgps","response.message()=="+response.message());
+                        result = response.body().string();
+                        Message msg = new Message();
+                        Bundle b = new Bundle();// 存放数据
+                        b.putString("getgps",result);
+                        msg.setData(b);
+                        FollowmeActivity.this.myHandler.sendMessage(msg);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
 }
