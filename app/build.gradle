@@ -41,4 +41,5 @@ dependencies {
     compileOnly 'com.dji:dji-sdk-provided:4.5.1'
     api 'com.amap.api:map2d:latest.integration'
     api 'com.amap.api:search:latest.integration'
+    implementation project(':openCVLibrary341')
 }
