@@ -2,6 +2,7 @@ package com.mrbluyee.djautocontrol.activity;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -20,10 +21,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import com.mrbluyee.djautocontrol.application.FPVActivity;
 import com.mrbluyee.djautocontrol.application.DJSDKApplication;
+import com.mrbluyee.djautocontrol.application.PictureHandle;
 import com.mrbluyee.djautocontrol.utils.ModuleVerificationUtil;
 import com.mrbluyee.djautocontrol.R;
+
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.imgproc.Imgproc;
 
 public class CameraActivity extends FPVActivity implements TextureView.SurfaceTextureListener, View.OnClickListener,View.OnTouchListener {
     private static final String TAG = CameraActivity.class.getName();
@@ -31,6 +38,8 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
     private GimbalRotateTimerTask gimbalRotationTimerTask;
     private Button mCaptureBtn, mCameraRiseBtn, mCameraDownBtn;
     private ToggleButton mRecordBtn;
+    private PictureHandle picturehandle = new PictureHandle(this);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_camera);
@@ -40,13 +49,39 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
     @Override
     protected void onResume() {
         super.onResume();
+        //load OpenCV engine and init OpenCV library
+        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, getApplicationContext(), mLoaderCallback);
+        Log.i(TAG, "onResume sucess load OpenCV...");
     }
     @Override
     protected void onDestroy() {
         super.onDestroy();
     }
-    private void initUI() {
+    @Override
+    public void onReturn(View view){
+        Log.d(TAG, "onReturn");
+        this.finish();
+    }
 
+    //OpenCV库加载并初始化成功后的回调函数
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+
+        @Override
+        public void onManagerConnected(int status) {
+            // TODO Auto-generated method stub
+            switch (status){
+                case BaseLoaderCallback.SUCCESS:
+                    Log.i(TAG, "成功加载");
+                    break;
+                default:
+                    super.onManagerConnected(status);
+                    Log.i(TAG, "加载失败");
+                    break;
+            }
+        }
+    };
+
+    private void initUI() {
         mCaptureBtn = (Button) findViewById(R.id.btn_capture);
         mRecordBtn = (ToggleButton) findViewById(R.id.btn_record);
         mCameraRiseBtn = (Button) findViewById(R.id.btn_camera_rise);
@@ -63,17 +98,16 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    new FileSaver().save();
+                    //Bitmap bitmap = mVideoSurface.getBitmap();
+                    //Bitmap matchmap = BitmapFactory.decodeResource(getResources(), R.drawable.match1);
+                   //picturehandle.match(bitmap,matchmap, Imgproc.TM_CCOEFF);
                 } else {
                     new FileSaver().save();
                 }
             }
         });
     }
-    public void onReturn(View view){
-        Log.d(TAG, "onReturn");
-        this.finish();
-    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -93,6 +127,7 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
                 break;
         }
     }
+
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (v.getId() == R.id.btn_camera_rise) {
@@ -163,11 +198,9 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
     }
 
     private class FileSaver implements Runnable {
-
         public void save() {
             new Thread(this).start();
         }
-
         @Override
         public void run() {
             try {
@@ -197,7 +230,6 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
             super();
             this.pitchValue = pitchValue;
         }
-
         @Override
         public void run() {
             if (ModuleVerificationUtil.isGimbalModuleAvailable()) {
