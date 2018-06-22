@@ -17,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -73,10 +74,14 @@ import dji.thirdparty.rx.schedulers.Schedulers;
 import com.mrbluyee.djautocontrol.R;
 import com.mrbluyee.djautocontrol.application.PhoneLocationApplication;
 import com.mrbluyee.djautocontrol.application.DJSDKApplication;
+import com.mrbluyee.djautocontrol.application.WebRequestApplication;
 import com.mrbluyee.djautocontrol.utils.AmapToGpsUtil;
+import com.mrbluyee.djautocontrol.utils.ChargeStationInfo;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import static com.mrbluyee.djautocontrol.utils.AmapToGpsUtil.gps_converter;
 
 
 public class FollowmeActivity extends FragmentActivity implements View.OnClickListener, OnMapClickListener {
@@ -100,8 +105,10 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
     private AtomicBoolean isRunning = new AtomicBoolean(false);
     private Subscription timmerSubcription;
     private Observable<Long> timer =Observable.timer(100, TimeUnit.MILLISECONDS).observeOn(Schedulers.computation()).repeat();
-    private MyHandler myHandler;
-    private JSONArray station_gps_jsonArray = null;
+    public MyHandler myHandler;
+
+    public SparseArray<ChargeStationInfo> stationInfos = new SparseArray<ChargeStationInfo>();
+    private WebRequestApplication webrequest = new WebRequestApplication();
 
     @Override
     protected void onResume(){
@@ -174,7 +181,6 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
 
         mapView = (MapView) findViewById(R.id.followme_map);
         mapView.onCreate(savedInstanceState);
-
         initMapView();
         initUI();
         addListener();
@@ -197,21 +203,10 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
             super.handleMessage(msg);
             // 此处可以更新UI
             Bundle b = msg.getData();
-            String station_gps_data = b.getString("getgps");
-            Log.d("MyHandler",station_gps_data);
-            try {
-                station_gps_jsonArray = new JSONArray(station_gps_data);
-                for (int i = 0; i< station_gps_jsonArray.length(); i++) {
-                    JSONObject jsonObject = station_gps_jsonArray.getJSONObject(i);
-                    int station_id = jsonObject.getInt("stationid");
-                    double station_lat = jsonObject.getDouble("lat");
-                    double station_lon = jsonObject.getDouble("lon");
-                    String station_create_time = jsonObject.getString("create_time");
-                    String station_update_time = jsonObject.getString("update_time");
-                    markchargesite(new LatLng(station_lat,station_lon),""+ station_id);
-                }
-            }catch (Exception e) {
-                e.printStackTrace();
+            webrequest.chargeStationInfoHandler(b,stationInfos);
+            for(int i = 0;i<stationInfos.size();i++){
+                ChargeStationInfo stationInfo = stationInfos.valueAt(i);
+                markchargesite(stationInfo.getStationPos(), "" + stationInfos.keyAt(i));
             }
         }
     }
@@ -354,7 +349,7 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
                 break;
             }
             case R.id.followme_search:{
-                Get_chargesite_gps_info();
+                webrequest.Get_chargesite_gps_info(myHandler);
                 break;
             }
             case R.id.followme_gosite:{
@@ -408,43 +403,4 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
         }
     }
 
-    private LatLng gps_converter(LatLng sourceLatLng){
-        CoordinateConverter converter  = new CoordinateConverter();
-        // CoordType.GPS 待转换坐标类型
-        converter.from(CoordinateConverter.CoordType.GPS);
-        // sourceLatLng待转换坐标点 DPoint类型
-        converter.coord(sourceLatLng);
-        // 执行转换操作
-        return converter.convert();
-    }
-
-    public void Get_chargesite_gps_info(){
-        new Thread(new Runnable() {
-            String  url = "http://139.196.138.204/tp5/public/station/returngaodegps";
-            String result = null;
-            @Override
-            public void run() {
-                try {
-                    OkHttpClient client = new OkHttpClient();//创建OkHttpClient对象
-                    Request request = new Request.Builder()
-                            .url(url)//请求接口。如果需要传参拼接到接口后面。
-                            .build();//创建Request 对象
-                    Response response = null;
-                    response = client.newCall(request).execute();//得到Response 对象
-                    if (response.isSuccessful()) {
-                        Log.d("getgps","response.code()=="+response.code());
-                        Log.d("getgps","response.message()=="+response.message());
-                        result = response.body().string();
-                        Message msg = new Message();
-                        Bundle b = new Bundle();// 存放数据
-                        b.putString("getgps",result);
-                        msg.setData(b);
-                        FollowmeActivity.this.myHandler.sendMessage(msg);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
 }
