@@ -13,6 +13,21 @@
         android:layout_centerHorizontal="true"
         android:layout_above="@+id/linearLayout" />
 
+    <RelativeLayout
+        android:id="@+id/camera_tracking_bg_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"  >
+
+        <ImageView
+            android:id="@+id/camera_tracking_send_rect"
+            android:layout_width="150dp"
+            android:layout_height="100dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/visual_track_highconfidence"
+            android:visibility="invisible" />
+    </RelativeLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

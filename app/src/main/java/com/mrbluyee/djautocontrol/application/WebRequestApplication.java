@@ -73,6 +73,7 @@ public class WebRequestApplication {
                         stationInfo.setStation_create_time(station_create_time);
                         stationInfo.setStation_update_time(station_update_time);
                         stationInfos.append(station_id, stationInfo);
+                        Log.d("MyHandler", "append station:"+ station_id);
                     }
                     else { //update data
                         ChargeStationInfo savedstationInfo = stationInfos.valueAt(station_id);
@@ -91,6 +92,7 @@ public class WebRequestApplication {
                         }
                         if(info_changed) {
                             stationInfos.put(station_id, savedstationInfo);
+                            Log.d("MyHandler", "modify station:"+ station_id);
                         }
                     }
                 }

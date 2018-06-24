@@ -119,6 +119,10 @@ public class FPVActivity extends Activity implements SurfaceTextureListener{
     protected void onDestroy() {
         Log.e(TAG, "onDestroy");
         uninitPreviewer();
+        if(mReceiver!=null){
+            unregisterReceiver(mReceiver);
+            mReceiver=null;
+        }
         super.onDestroy();
     }
 
@@ -150,7 +154,7 @@ public class FPVActivity extends Activity implements SurfaceTextureListener{
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        Log.e(TAG, "onSurfaceTextureAvailable");
+        Log.i(TAG, "onSurfaceTextureAvailable");
         if (mCodecManager == null) {
             mCodecManager = new DJICodecManager(this, surface, width, height);
         }
@@ -158,17 +162,16 @@ public class FPVActivity extends Activity implements SurfaceTextureListener{
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-        Log.e(TAG, "onSurfaceTextureSizeChanged");
+        Log.i(TAG, "onSurfaceTextureSizeChanged");
     }
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        Log.e(TAG,"onSurfaceTextureDestroyed");
+        Log.i(TAG,"onSurfaceTextureDestroyed");
         if (mCodecManager != null) {
             mCodecManager.cleanSurface();
             mCodecManager = null;
         }
-
         return false;
     }
 
@@ -207,13 +210,6 @@ public class FPVActivity extends Activity implements SurfaceTextureListener{
         if(!ret) {
 //            mConnectStatusTextView.setText("Disconnected");
         }
-    }
-
-    public void resetIndex() {
-        INDEX_CHOSEN = new int[3];
-        INDEX_CHOSEN[0] = -1;
-        INDEX_CHOSEN[1] = -1;
-        INDEX_CHOSEN[2] = -1;
     }
 }
 
