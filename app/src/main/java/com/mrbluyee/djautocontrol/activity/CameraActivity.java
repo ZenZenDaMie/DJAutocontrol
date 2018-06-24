@@ -265,7 +265,6 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
         super.onSurfaceTextureUpdated(surface);
-        Log.i(TAG,"Surface Texture Updated");
         Bitmap bitmap = mVideoSurface.getBitmap();
         targetsArray = picturehandle.match(bitmap);
         if(targetsArray.length > 0){
@@ -289,7 +288,6 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
             mTrackingImage.setVisibility(View.INVISIBLE);
         }
     }
-
 }
 
 

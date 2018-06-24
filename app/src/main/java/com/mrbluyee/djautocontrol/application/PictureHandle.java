@@ -97,6 +97,7 @@ public class PictureHandle extends BaseLoaderCallback {
         MatOfRect targets = new MatOfRect();
         if (mDetectorType == JAVA_DETECTOR) {
             if (mJavaDetector != null)
+                Log.i(TAG,"JavaDetector handled");
                 mJavaDetector.detectMultiScale(srcimg, targets, 1.1, 8, 2, // TODO: objdetect.CV_HAAR_SCALE_IMAGE
                         new Size(mAbsoluteTargetSize, mAbsoluteTargetSize), new Size());
         }
