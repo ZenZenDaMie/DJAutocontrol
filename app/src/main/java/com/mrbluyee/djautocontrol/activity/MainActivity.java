@@ -76,7 +76,8 @@ public class MainActivity extends Activity implements OnClickListener{
                 break;
             }
             case R.id.remote_control_button:{
-
+                Intent intent = new Intent(this, RemoteControlActivity.class);
+                startActivity(intent);
                 break;
             }
             case R.id.gps_track_button:{
