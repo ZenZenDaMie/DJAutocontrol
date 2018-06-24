@@ -34,7 +34,9 @@ import com.mrbluyee.djautocontrol.R;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
 import org.opencv.core.Core;
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -124,7 +126,8 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_capture:{
-                new FileSaver().save();
+                Bitmap bitmap = mVideoSurface.getBitmap();
+                new FileSaver(bitmap,"drone_camera.jpg").save();
                 break;
             }
             case R.id.btn_camera_rise:{
@@ -210,19 +213,25 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
     }
 
     private class FileSaver implements Runnable {
+        private Bitmap bitmap;
+        private String file_name;
+        public FileSaver(Bitmap bitmap,String file_name){
+            this.bitmap = bitmap;
+            this.file_name = file_name;
+        }
         public void save() {
             new Thread(this).start();
         }
         @Override
         public void run() {
             try {
-                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "drone_camera.jpg");
+                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), file_name);
                 file.createNewFile();
 
                 FileOutputStream os = new FileOutputStream(file);
                 BufferedOutputStream bos = new BufferedOutputStream(os);
 
-                Bitmap bitmap = mVideoSurface.getBitmap();
+                //Bitmap bitmap = mVideoSurface.getBitmap();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
 
                 bos.flush();
@@ -266,26 +275,29 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
         super.onSurfaceTextureUpdated(surface);
         Bitmap bitmap = mVideoSurface.getBitmap();
-        targetsArray = picturehandle.match(bitmap);
+        Mat srcimg = new Mat();
+        Utils.bitmapToMat(bitmap, srcimg);
+        Imgproc.cvtColor(srcimg, srcimg,Imgproc.COLOR_RGBA2GRAY);
+        targetsArray = picturehandle.match(srcimg);
         if(targetsArray.length > 0){
-            View parent = (View) mTrackingImage.getParent();
-            final int l = (int)(targetsArray[0].x * parent.getWidth());
-            final int t = (int)(targetsArray[0].y * parent.getHeight());
-            final int r = (int)((targetsArray[0].x + targetsArray[0].width) * parent.getWidth());
-            final int b = (int)((targetsArray[0].y + targetsArray[0].height) * parent.getHeight());
             CameraActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mTrackingImage.setVisibility(View.VISIBLE);
-                    mTrackingImage.setX(l);
-                    mTrackingImage.setY(t);
-                    mTrackingImage.getLayoutParams().width = r - l;
-                    mTrackingImage.getLayoutParams().height = b - t;
+                    mTrackingImage.setX(targetsArray[0].x);
+                    mTrackingImage.setY(targetsArray[0].y);
+                    mTrackingImage.getLayoutParams().width = targetsArray[0].width;
+                    mTrackingImage.getLayoutParams().height = targetsArray[0].height;
                     mTrackingImage.requestLayout();
+                    mTrackingImage.setVisibility(View.VISIBLE);
                 }
             });
         }else {
-            mTrackingImage.setVisibility(View.INVISIBLE);
+            CameraActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mTrackingImage.setVisibility(View.INVISIBLE);
+                }
+            });
         }
     }
 }

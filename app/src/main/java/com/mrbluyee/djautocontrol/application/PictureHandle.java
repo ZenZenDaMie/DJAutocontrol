@@ -84,10 +84,7 @@ public class PictureHandle extends BaseLoaderCallback {
         }
     }
 
-    public Rect[] match(Bitmap srcmap) {
-        Mat srcimg = new Mat();
-        Utils.bitmapToMat(srcmap, srcimg);
-        Imgproc.cvtColor(srcimg, srcimg,Imgproc.COLOR_RGBA2GRAY );
+    public Rect[] match(Mat srcimg) {
         if (mAbsoluteTargetSize == 0) {
             int height = srcimg.rows();
             if (Math.round(height * mRelativeTargetSize) > 0) {
@@ -97,14 +94,12 @@ public class PictureHandle extends BaseLoaderCallback {
         MatOfRect targets = new MatOfRect();
         if (mDetectorType == JAVA_DETECTOR) {
             if (mJavaDetector != null)
-                Log.i(TAG,"JavaDetector handled");
-                mJavaDetector.detectMultiScale(srcimg, targets, 1.1, 8, 2, // TODO: objdetect.CV_HAAR_SCALE_IMAGE
+                mJavaDetector.detectMultiScale(srcimg, targets, 1.1, 2, 2, // TODO: objdetect.CV_HAAR_SCALE_IMAGE
                         new Size(mAbsoluteTargetSize, mAbsoluteTargetSize), new Size());
         }
         else {
             Log.e(TAG, "Detection method is not selected!");
         }
-        Rect[] targetsArray = targets.toArray();
-        return targetsArray;
+        return targets.toArray();
     }
 }
