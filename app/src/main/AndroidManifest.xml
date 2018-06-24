@@ -117,6 +117,10 @@
             android:configChanges="orientation|screenSize"
             android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
         </activity>
+        <activity
+            android:name=".activity.RemoteControlActivity"
+            android:screenOrientation="portrait" >
+        </activity>
     </application>
 
 </manifest>
