@@ -4,7 +4,6 @@
     android:layout_height="match_parent">
     <Button
         android:id="@+id/btn_enable_virtual_stick"
-        android:layout_centerHorizontal="true"
         android:layout_marginRight="10dp"
         android:layout_marginTop="10dp"
         android:layout_toLeftOf="@id/btn_disable_virtual_stick"
@@ -12,8 +11,8 @@
         style="@style/common_button"/>
     <Button
         android:id="@+id/btn_disable_virtual_stick"
-        android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true"
         android:text="Disable Virtual Stick"
         style="@style/common_button"
         />
@@ -96,7 +95,7 @@
         android:layout_height="130dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="100dp"
         android:layout_marginLeft="10dp"
         android:background="@mipmap/joystick_bg"/>
 
@@ -106,7 +105,7 @@
         android:layout_height="130dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="100dp"
         android:layout_marginRight="10dp"
         android:background="@mipmap/joystick_bg"/>
 
