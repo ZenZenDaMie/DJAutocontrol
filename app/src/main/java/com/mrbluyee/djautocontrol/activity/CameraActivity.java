@@ -22,6 +22,8 @@ import dji.common.util.CommonCallbacks;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -127,7 +129,7 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
         switch (v.getId()) {
             case R.id.btn_capture:{
                 Bitmap bitmap = mVideoSurface.getBitmap();
-                new FileSaver(bitmap,"drone_camera.jpg").save();
+                new FileSaver(bitmap).save();
                 break;
             }
             case R.id.btn_camera_rise:{
@@ -214,10 +216,9 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
 
     private class FileSaver implements Runnable {
         private Bitmap bitmap;
-        private String file_name;
-        public FileSaver(Bitmap bitmap,String file_name){
+        private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+        public FileSaver(Bitmap bitmap){
             this.bitmap = bitmap;
-            this.file_name = file_name;
         }
         public void save() {
             new Thread(this).start();
@@ -225,7 +226,8 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
         @Override
         public void run() {
             try {
-                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), file_name);
+                Date date = new Date(System.currentTimeMillis());
+                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Drone_IMG_"+simpleDateFormat.format(date)+".jpg");
                 file.createNewFile();
 
                 FileOutputStream os = new FileOutputStream(file);
