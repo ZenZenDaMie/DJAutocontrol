@@ -50,6 +50,8 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
     private boolean verticalControlModeFlag = true;
     private boolean horizontalCoordinateFlag = true;
 
+    public boolean ControlFlag=false;
+
     private Button btnEnableVirtualStick;
     private Button btnDisableVirtualStick;
     private Button btnTakeOff;
@@ -223,8 +225,18 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
         }
         switch (v.getId()) {
             case R.id.btn_enable_virtual_stick:{
+                if(ControlFlag==false){
+                    Toast.makeText(this, "virtual_stick on", Toast.LENGTH_LONG).show();
+                    ControlFlag=true;
+                    remotecontrol.EnableVirtualStick();
+                }
+                else{
+                    Toast.makeText(this, "virtual_stick still on", Toast.LENGTH_LONG).show();
+                }
+                /*
                 Toast.makeText(this, "virtual_stick on", Toast.LENGTH_LONG).show();
                 remotecontrol.EnableVirtualStick();
+                */
                 /*
                 //使能控制
                 DJSDKApplication.getAircraftInstance().
@@ -251,6 +263,16 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
                     sendVirtualStickDataTimer.schedule(sendVirtualStickDataTask, 100, 200);
                 }*/
                 break;
+            }
+            case R.id.btn_disable_virtual_stick:{
+                if(ControlFlag==true){
+                    Toast.makeText(this, "virtual_stick off", Toast.LENGTH_LONG).show();
+                    ControlFlag=false;
+                    remotecontrol.DisableVirtualStick();
+                }
+                else{
+                    Toast.makeText(this, "virtual_stick still off", Toast.LENGTH_LONG).show();
+                }
             }
             case R.id.btn_take_off:{
                 DJSDKApplication.getAircraftInstance().getFlightController()
