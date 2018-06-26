@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <Button
+        android:id="@+id/btn_enable_virtual_stick"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_toLeftOf="@id/btn_disable_virtual_stick"
+        android:text="Enable Virtual Stick"
+        style="@style/common_button"/>
+    <Button
+        android:id="@+id/btn_disable_virtual_stick"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true"
+        android:text="Disable Virtual Stick"
+        style="@style/common_button"
+        />
+
+
+    <Button
+        android:id="@+id/btn_take_off"
+        android:layout_below="@+id/btn_enable_virtual_stick"
+        style="@style/common_button"
+        android:layout_toLeftOf="@id/btn_auto_land"
+        android:layout_marginRight="10dp"
+
+        android:text="Take Off" />
+    <Button
+        android:id="@+id/btn_auto_land"
+        android:layout_below="@+id/btn_disable_virtual_stick"
+        android:layout_centerHorizontal="true"
+        android:text="Auto Land"
+        style="@style/common_button"
+        />
+    <Button
+        android:id="@+id/btn_up"
+        android:layout_below="@+id/btn_take_off"
+        style="@style/common_button"
+        android:layout_toLeftOf="@id/btn_auto_land"
+        android:layout_marginRight="10dp"
+        android:text="Up" />
+    <Button
+        android:id="@+id/btn_down"
+        android:layout_below="@+id/btn_auto_land"
+        android:layout_centerHorizontal="true"
+        android:text="Down"
+        style="@style/common_button"
+        />
+    <Button
+        android:id="@+id/btn_left_turn"
+        android:layout_below="@+id/btn_up"
+        style="@style/common_button"
+        android:layout_toLeftOf="@id/btn_auto_land"
+        android:layout_marginRight="10dp"
+        android:text="Left Turn" />
+    <Button
+        android:id="@+id/btn_right_turn"
+        android:layout_below="@+id/btn_down"
+        android:layout_centerHorizontal="true"
+        android:text="Right Turn"
+        style="@style/common_button"
+        />
+    <Button
+    android:id="@+id/btn_left_move"
+    android:layout_below="@+id/btn_left_turn"
+    style="@style/common_button"
+    android:layout_toLeftOf="@id/btn_auto_land"
+    android:layout_marginRight="10dp"
+    android:text="Left Move" />
+    <Button
+        android:id="@+id/btn_right_move"
+        android:layout_below="@+id/btn_right_turn"
+        android:layout_centerHorizontal="true"
+        android:text="Right Move"
+        style="@style/common_button"
+        />
+    <Button
+        android:id="@+id/btn_ahead_move"
+        android:layout_below="@+id/btn_left_move"
+        style="@style/common_button"
+        android:layout_toLeftOf="@id/btn_auto_land"
+        android:layout_marginRight="10dp"
+        android:text="Ahead Move" />
+    <Button
+        android:id="@+id/btn_back_move"
+        android:layout_below="@+id/btn_right_move"
+        android:layout_centerHorizontal="true"
+        android:text="Back Move"
+        style="@style/common_button"
+        />
+    <com.mrbluyee.djautocontrol.utils.OnScreenJoystick
+        android:id="@+id/directionJoystickRight"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="100dp"
+        android:layout_marginLeft="10dp"
+        android:background="@mipmap/joystick_bg"/>
+
+    <com.mrbluyee.djautocontrol.utils.OnScreenJoystick
+        android:id="@+id/directionJoystickLeft"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="100dp"
+        android:layout_marginRight="10dp"
+        android:background="@mipmap/joystick_bg"/>
+
+</RelativeLayout>

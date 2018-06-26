@@ -51,8 +51,9 @@ public class WebRequestApplication {
         }).start();
     }
 
-    public void chargeStationInfoHandler(Bundle b,SparseArray<ChargeStationInfo> stationInfos)
+    public SparseArray<ChargeStationInfo> chargeStationInfoHandler(Bundle b)
     {
+        SparseArray<ChargeStationInfo> stationInfos = new SparseArray<ChargeStationInfo>();
         JSONArray station_gps_jsonArray = null;
         String station_gps_data = b.getString("getgps");
         if(station_gps_data != null) {
@@ -67,37 +68,18 @@ public class WebRequestApplication {
                     LatLng station_pos = new LatLng(station_lat, station_lon);
                     String station_create_time = jsonObject.getString("create_time");
                     String station_update_time = jsonObject.getString("update_time");
-                    if(stationInfos.indexOfKey(station_id) == -1){    //no data
-                        ChargeStationInfo stationInfo = new ChargeStationInfo();
-                        stationInfo.setStationPos(station_pos);
-                        stationInfo.setStation_create_time(station_create_time);
-                        stationInfo.setStation_update_time(station_update_time);
-                        stationInfos.append(station_id, stationInfo);
-                    }
-                    else { //update data
-                        ChargeStationInfo savedstationInfo = stationInfos.valueAt(station_id);
-                        boolean info_changed = false;
-                        if((savedstationInfo.getStationPos().longitude != station_pos.longitude)&&(savedstationInfo.getStationPos().latitude != station_pos.latitude)) {
-                            savedstationInfo.setStationPos(station_pos);
-                            info_changed = true;
-                        }
-                        if(!savedstationInfo.getStation_create_time().equals(station_create_time)) {
-                            savedstationInfo.setStation_create_time(station_create_time);
-                            info_changed = true;
-                        }
-                        if(!savedstationInfo.getStation_update_time().equals(station_update_time)) {
-                            savedstationInfo.setStation_update_time(station_update_time);
-                            info_changed = true;
-                        }
-                        if(info_changed) {
-                            stationInfos.put(station_id, savedstationInfo);
-                        }
-                    }
+                    ChargeStationInfo stationInfo = new ChargeStationInfo();
+                    stationInfo.setStationPos(station_pos);
+                    stationInfo.setStation_create_time(station_create_time);
+                    stationInfo.setStation_update_time(station_update_time);
+                    stationInfos.append(station_id, stationInfo);
+                    Log.d("MyHandler", "append station:"+ station_id);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        return stationInfos;
     }
 
     public void Get_chargesite_info(final Handler UIHandler,final int stationid){

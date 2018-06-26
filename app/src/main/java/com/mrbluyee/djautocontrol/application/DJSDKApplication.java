@@ -30,7 +30,7 @@ public class DJSDKApplication extends Application{
     private static BluetoothProductConnector bluetoothConnector = null;
     private static BaseProduct mProduct;
     public Handler mHandler;
-
+    private static Application app = null;
     private Application instance;
 
     public void setContext(Application application) {
@@ -200,5 +200,7 @@ public class DJSDKApplication extends Application{
             getApplicationContext().sendBroadcast(intent);
         }
     };
-
+    public static Application getInstance() {
+        return DJSDKApplication.app;
+    }
 }

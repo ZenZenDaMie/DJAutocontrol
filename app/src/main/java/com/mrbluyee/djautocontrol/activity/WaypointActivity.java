@@ -8,11 +8,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -59,7 +63,9 @@ import dji.sdk.useraccount.UserAccountManager;
 import com.mrbluyee.djautocontrol.R;
 import com.mrbluyee.djautocontrol.application.PhoneLocationApplication;
 import com.mrbluyee.djautocontrol.application.DJSDKApplication;
+import com.mrbluyee.djautocontrol.application.WebRequestApplication;
 import com.mrbluyee.djautocontrol.utils.AmapToGpsUtil;
+import com.mrbluyee.djautocontrol.utils.ChargeStationInfo;
 
 public class WaypointActivity extends FragmentActivity implements View.OnClickListener, OnMapClickListener {
     protected static final String TAG = WaypointActivity.class.getName();
@@ -67,12 +73,12 @@ public class WaypointActivity extends FragmentActivity implements View.OnClickLi
     private MapView mapView;
     private AMap aMap;
 
-    private Button locate, add, clear;
+    private Button locate, searh_site,add, clear;
     private Button config, upload, start, stop;
 
     private boolean isAdd = false;
 
-    private double droneLocationLat = 181, droneLocationLng = 181;
+    private double droneLocationLat = 121.40533301729, droneLocationLng = 31.322594332605;
     private final Map<Integer, Marker> mMarkers = new ConcurrentHashMap<Integer, Marker>();
     private Marker droneMarker = null;
 
@@ -87,6 +93,10 @@ public class WaypointActivity extends FragmentActivity implements View.OnClickLi
     private WaypointMissionFinishedAction mFinishedAction = WaypointMissionFinishedAction.NO_ACTION;
     private WaypointMissionHeadingMode mHeadingMode = WaypointMissionHeadingMode.AUTO;
 
+    private MyHandler myHandler;
+
+    public SparseArray<ChargeStationInfo> stationInfos = new SparseArray<ChargeStationInfo>();
+    private WebRequestApplication webrequest = new WebRequestApplication();
     @Override
     protected void onResume(){
         super.onResume();
@@ -125,6 +135,7 @@ public class WaypointActivity extends FragmentActivity implements View.OnClickLi
     private void initUI() {
 
         locate = (Button) findViewById(R.id.locate);
+        searh_site = (Button) findViewById(R.id.waypoint_search);
         add = (Button) findViewById(R.id.add);
         clear = (Button) findViewById(R.id.clear);
         config = (Button) findViewById(R.id.config);
@@ -139,7 +150,7 @@ public class WaypointActivity extends FragmentActivity implements View.OnClickLi
         upload.setOnClickListener(this);
         start.setOnClickListener(this);
         stop.setOnClickListener(this);
-
+        searh_site.setOnClickListener(this);
     }
 
     private void initMapView() {
@@ -153,6 +164,7 @@ public class WaypointActivity extends FragmentActivity implements View.OnClickLi
         aMap.addMarker(new MarkerOptions().position(phone_location).title("phone marker"));
         CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(phone_location , zoomlevel);
         aMap.moveCamera(cu);
+        aMap.setOnMarkerClickListener(markerClickListener); // 绑定 Marker 被点击事件
     }
 
     @Override
@@ -172,7 +184,37 @@ public class WaypointActivity extends FragmentActivity implements View.OnClickLi
         initUI();
         addListener();
         initFlightController();
+        myHandler = new MyHandler();
+    }
 
+    class MyHandler extends Handler {
+        public MyHandler() {
+        }
+
+        public MyHandler(Looper L) {
+            super(L);
+        }
+        // 子类必须重写此方法，接受数据
+        @Override
+        public void handleMessage(Message msg) {
+            // TODO Auto-generated method stub
+            Log.d(TAG,"handleMessage");
+            super.handleMessage(msg);
+            // 此处可以更新UI
+            Bundle b = msg.getData();
+            SparseArray<ChargeStationInfo> stationInfos_temp = webrequest.chargeStationInfoHandler(b);
+            for(int i = 0;i<stationInfos_temp.size();i++){
+                int station_id = stationInfos_temp.keyAt(i);
+                ChargeStationInfo updatetationInfo = stationInfos_temp.valueAt(i);
+                if(stationInfos.indexOfKey(stationInfos_temp.keyAt(i)) == -1){    //no data
+                    stationInfos.append(station_id,updatetationInfo);
+                }
+                else { //update data
+                    stationInfos.put(station_id, updatetationInfo);
+                }
+                markchargesite(updatetationInfo.getStationPos(), "" + station_id);
+            }
+        }
     }
 
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -309,6 +351,7 @@ public class WaypointActivity extends FragmentActivity implements View.OnClickLi
         //Create MarkerOptions object
         final MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(pos);
+        markerOptions.title("drone");
         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.aircraft));
 
         runOnUiThread(new Runnable() {
@@ -334,12 +377,27 @@ public class WaypointActivity extends FragmentActivity implements View.OnClickLi
         mMarkers.put(mMarkers.size(), marker);
     }
 
+    private void markchargesite(LatLng point,String station_id){
+        //Create MarkerOptions object
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(point);
+        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.charge_site));
+        markerOptions.title("charge station");
+        markerOptions.snippet(station_id);
+        Marker marker = aMap.addMarker(markerOptions);
+        mMarkers.put(mMarkers.size(), marker);
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.locate:{
                 updateDroneLocation();
                 cameraUpdate(); // Locate the drone's place
+                break;
+            }
+            case R.id.waypoint_search:{
+                webrequest.Get_chargesite_gps_info(myHandler);
                 break;
             }
             case R.id.add:{
@@ -397,6 +455,35 @@ public class WaypointActivity extends FragmentActivity implements View.OnClickLi
             add.setText("Add");
         }
     }
+
+    // 定义 Marker 点击事件监听
+    AMap.OnMarkerClickListener markerClickListener = new AMap.OnMarkerClickListener() {
+        @Override
+        public boolean onMarkerClick(Marker marker) {
+            if (isAdd == true){
+                LatLng point = marker.getPosition();
+                marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                LatLng gps_point = AmapToGpsUtil.toGPSPoint(point.latitude, point.longitude);
+                Waypoint mWaypoint = new Waypoint(gps_point.latitude, gps_point.longitude, altitude);
+                //Add Waypoints to Waypoint arraylist;
+                if (waypointMissionBuilder != null) {
+                    waypointList.add(mWaypoint);
+                    waypointMissionBuilder.waypointList(waypointList).waypointCount(waypointList.size());
+                }else
+                {
+                    waypointMissionBuilder = new WaypointMission.Builder();
+                    waypointList.add(mWaypoint);
+                    waypointMissionBuilder.waypointList(waypointList).waypointCount(waypointList.size());
+                }
+            }else{
+                setResultToToast("Cannot Add Waypoint");
+            }
+            return true;
+        }
+        // marker 对象被点击时回调的接口
+        // 返回 true 则表示接口已响应事件，否则返回false
+
+    };
 
     private void showSettingDialog(){
         LinearLayout wayPointSettings = (LinearLayout)getLayoutInflater().inflate(R.layout.dialog_waypointsetting, null);

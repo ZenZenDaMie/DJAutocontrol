@@ -92,7 +92,7 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
 
     private Button locate, searh_site, gosite;
 
-    private double droneLocationLat = 181, droneLocationLng = 181;
+    private double droneLocationLat = 121.40533301729, droneLocationLng = 31.322594332605;
     private final Map<Integer, Marker> mMarkers = new ConcurrentHashMap<Integer, Marker>();
     private Marker droneMarker = null;
 
@@ -105,7 +105,7 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
     private AtomicBoolean isRunning = new AtomicBoolean(false);
     private Subscription timmerSubcription;
     private Observable<Long> timer =Observable.timer(100, TimeUnit.MILLISECONDS).observeOn(Schedulers.computation()).repeat();
-    public MyHandler myHandler;
+    private MyHandler myHandler;
 
     public SparseArray<ChargeStationInfo> stationInfos = new SparseArray<ChargeStationInfo>();
     private WebRequestApplication webrequest = new WebRequestApplication();
@@ -164,9 +164,10 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
         }
         PhoneLocationApplication.initLocation(this);
         LatLng phone_location = gps_converter(new LatLng(PhoneLocationApplication.latitude, PhoneLocationApplication.longitude));
-        aMap.addMarker(new MarkerOptions().position(phone_location).title("phone marker"));
+        aMap.addMarker(new MarkerOptions().position(phone_location).title("phone"));
         CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(phone_location , zoomlevel);
         aMap.moveCamera(cu);
+        aMap.setOnMarkerClickListener(markerClickListener); // 绑定 Marker 被点击事件
     }
 
     @Override
@@ -199,14 +200,21 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
         @Override
         public void handleMessage(Message msg) {
             // TODO Auto-generated method stub
-            Log.d("MyHandler","handleMessage");
+            Log.d(TAG,"handleMessage");
             super.handleMessage(msg);
             // 此处可以更新UI
             Bundle b = msg.getData();
-            webrequest.chargeStationInfoHandler(b,stationInfos);
-            for(int i = 0;i<stationInfos.size();i++){
-                ChargeStationInfo stationInfo = stationInfos.valueAt(i);
-                markchargesite(stationInfo.getStationPos(), "" + stationInfos.keyAt(i));
+            SparseArray<ChargeStationInfo> stationInfos_temp = webrequest.chargeStationInfoHandler(b);
+            for(int i = 0;i<stationInfos_temp.size();i++){
+                int station_id = stationInfos_temp.keyAt(i);
+                ChargeStationInfo updatetationInfo = stationInfos_temp.valueAt(i);
+                if(stationInfos.indexOfKey(stationInfos_temp.keyAt(i)) == -1){    //no data
+                    stationInfos.append(station_id,updatetationInfo);
+                }
+                else { //update data
+                        stationInfos.put(station_id, updatetationInfo);
+                }
+                markchargesite(updatetationInfo.getStationPos(), "" + station_id);
             }
         }
     }
@@ -314,6 +322,7 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
         //Create MarkerOptions object
         final MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(pos);
+        markerOptions.title("drone");
         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.aircraft));
 
         runOnUiThread(new Runnable() {
@@ -330,12 +339,13 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
         });
     }
 
-    private void markchargesite(LatLng point,String title){
+    private void markchargesite(LatLng point,String station_id){
         //Create MarkerOptions object
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(point);
         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.charge_site));
-        markerOptions.title(title);
+        markerOptions.title("charge station");
+        markerOptions.snippet(station_id);
         Marker marker = aMap.addMarker(markerOptions);
         mMarkers.put(mMarkers.size(), marker);
     }
@@ -353,7 +363,7 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
                 break;
             }
             case R.id.followme_gosite:{
-
+                followMeStart();
                 break;
             }
             default:
@@ -365,6 +375,26 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
     public void onMapClick(LatLng point){
 
     }
+
+    // 定义 Marker 点击事件监听
+    AMap.OnMarkerClickListener markerClickListener = new AMap.OnMarkerClickListener() {
+        // marker 对象被点击时回调的接口
+        // 返回 true 则表示接口已响应事件，否则返回false
+        @Override
+        public boolean onMarkerClick(Marker marker) {
+            if(marker.getTitle().equals("charge station")){
+                int id = Integer.parseInt(marker.getSnippet());
+                int station_index = stationInfos.indexOfKey(id);
+                if (station_index != -1) {
+                    if (aMap != null) {
+                        ChargeStationInfo chargeStationInfo = stationInfos.valueAt(station_index);
+                        LatLng station_location = chargeStationInfo.getStationPos();
+                    }
+                }
+            }
+            return false;
+        }
+    };
 
     private void cameraUpdate(){
         LatLng pos = gps_converter(new LatLng(droneLocationLat, droneLocationLng));
@@ -402,5 +432,4 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
             Toast.makeText(getApplicationContext(), getFollowMeMissionOperator().getCurrentState().toString(), Toast.LENGTH_SHORT).show();
         }
     }
-
 }

@@ -47,6 +47,7 @@ public class FPVActivity extends Activity implements SurfaceTextureListener{
     // Codec for video live view
     protected DJICodecManager mCodecManager = null;
     private BaseProduct mProduct;
+    private Camera camera = null;
     //To store index chosen in PopupNumberPicker listener
     protected static int[] INDEX_CHOSEN = {-1, -1, -1};
     protected TextView mConnectStatusTextView;
@@ -76,7 +77,20 @@ public class FPVActivity extends Activity implements SurfaceTextureListener{
                 }
             }
         };
+        camera = DJSDKApplication.getCameraInstance();
+        if(camera != null){
+            camera.setMode(SettingsDefinitions.CameraMode.RECORD_VIDEO, new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError error) {
+                    if (error == null) {
+                        Log.i(TAG, "Switch Camera Mode Succeeded");
+                    } else {
+                        Log.e(TAG, error.getDescription());
+                    }
+                }
+            });
         }
+    }
 
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
@@ -89,7 +103,7 @@ public class FPVActivity extends Activity implements SurfaceTextureListener{
     };
     @Override
     protected void onResume() {
-        Log.e(TAG, "onResume");
+        Log.d(TAG, "onResume");
         super.onResume();
         initPreviewer();
         if(mVideoSurface == null) {
@@ -99,26 +113,30 @@ public class FPVActivity extends Activity implements SurfaceTextureListener{
 
     @Override
     protected void onPause() {
-        Log.e(TAG, "onPause");
+        Log.d(TAG, "onPause");
         uninitPreviewer();
         super.onPause();
     }
 
     @Override
     protected void onStop() {
-        Log.e(TAG, "onStop");
+        Log.d(TAG, "onStop");
         super.onStop();
     }
 
     protected void onReturn(View view){
-        Log.e(TAG, "onReturn");
+        Log.d(TAG, "onReturn");
         this.finish();
     }
 
     @Override
     protected void onDestroy() {
-        Log.e(TAG, "onDestroy");
+        Log.d(TAG, "onDestroy");
         uninitPreviewer();
+        if(mReceiver!=null){
+            unregisterReceiver(mReceiver);
+            mReceiver=null;
+        }
         super.onDestroy();
     }
 
@@ -141,7 +159,6 @@ public class FPVActivity extends Activity implements SurfaceTextureListener{
     }
 
     private void uninitPreviewer() {
-        Camera camera = DJSDKApplication.getCameraInstance();
         if (camera != null){
             // Reset the callback
             VideoFeeder.getInstance().getPrimaryVideoFeed().setCallback(null);
@@ -150,7 +167,7 @@ public class FPVActivity extends Activity implements SurfaceTextureListener{
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        Log.e(TAG, "onSurfaceTextureAvailable");
+        Log.i(TAG, "onSurfaceTextureAvailable");
         if (mCodecManager == null) {
             mCodecManager = new DJICodecManager(this, surface, width, height);
         }
@@ -158,17 +175,16 @@ public class FPVActivity extends Activity implements SurfaceTextureListener{
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-        Log.e(TAG, "onSurfaceTextureSizeChanged");
+        Log.i(TAG, "onSurfaceTextureSizeChanged");
     }
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        Log.e(TAG,"onSurfaceTextureDestroyed");
+        Log.i(TAG,"onSurfaceTextureDestroyed");
         if (mCodecManager != null) {
             mCodecManager.cleanSurface();
             mCodecManager = null;
         }
-
         return false;
     }
 
@@ -207,13 +223,6 @@ public class FPVActivity extends Activity implements SurfaceTextureListener{
         if(!ret) {
 //            mConnectStatusTextView.setText("Disconnected");
         }
-    }
-
-    public void resetIndex() {
-        INDEX_CHOSEN = new int[3];
-        INDEX_CHOSEN[0] = -1;
-        INDEX_CHOSEN[1] = -1;
-        INDEX_CHOSEN[2] = -1;
     }
 }
 

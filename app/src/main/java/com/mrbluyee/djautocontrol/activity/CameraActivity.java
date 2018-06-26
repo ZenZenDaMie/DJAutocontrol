@@ -1,36 +1,48 @@
 package com.mrbluyee.djautocontrol.activity;
 
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.ToggleButton;
+
+import com.mrbluyee.djautocontrol.R;
+import com.mrbluyee.djautocontrol.application.DJSDKApplication;
+import com.mrbluyee.djautocontrol.application.FPVActivity;
+import com.mrbluyee.djautocontrol.application.PictureHandle;
+import com.mrbluyee.djautocontrol.utils.ModuleVerificationUtil;
+
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.core.Rect;
+import org.opencv.imgproc.Imgproc;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import dji.common.error.DJIError;
 import dji.common.gimbal.Rotation;
 import dji.common.gimbal.RotationMode;
 import dji.common.util.CommonCallbacks;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import com.mrbluyee.djautocontrol.application.FPVActivity;
-import com.mrbluyee.djautocontrol.application.DJSDKApplication;
-import com.mrbluyee.djautocontrol.application.PictureHandle;
-import com.mrbluyee.djautocontrol.utils.ModuleVerificationUtil;
-import com.mrbluyee.djautocontrol.R;
-
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.imgproc.Imgproc;
 
 public class CameraActivity extends FPVActivity implements TextureView.SurfaceTextureListener, View.OnClickListener,View.OnTouchListener {
     private static final String TAG = CameraActivity.class.getName();
@@ -39,19 +51,67 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
     private Button mCaptureBtn, mCameraRiseBtn, mCameraDownBtn;
     private ToggleButton mRecordBtn;
     private PictureHandle picturehandle = new PictureHandle(this);
-
+    private ImageView mTrackingImage;
+    private Rect[] targetsArray = null;
+    private MyHandler myHandler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_camera);
         super.onCreate(savedInstanceState);
         initUI();
+        myHandler = new MyHandler();
     }
+
+
+    class MyHandler extends Handler {
+        public MyHandler() {
+        }
+
+        public MyHandler(Looper L) {
+            super(L);
+        }
+        // 子类必须重写此方法，接受数据
+        @Override
+        public void handleMessage(Message msg) {
+            // TODO Auto-generated method stub
+            super.handleMessage(msg);
+            // 此处可以更新UI
+            Bundle b = msg.getData();
+            targetsArray = (Rect[]) b.getSerializable("picturehandle");
+            if(targetsArray.length > 0){
+                CameraActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTrackingImage.setX(targetsArray[0].x);
+                        mTrackingImage.setY(targetsArray[0].y);
+                        mTrackingImage.getLayoutParams().width = targetsArray[0].width;
+                        mTrackingImage.getLayoutParams().height = targetsArray[0].height;
+                        mTrackingImage.requestLayout();
+                        mTrackingImage.setVisibility(View.VISIBLE);
+                    }
+                });
+            }else {
+                CameraActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTrackingImage.setVisibility(View.INVISIBLE);
+                    }
+                });
+            }
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         //load OpenCV engine and init OpenCV library
-        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, getApplicationContext(), mLoaderCallback);
-        Log.i(TAG, "onResume sucess load OpenCV...");
+        if(!OpenCVLoader.initDebug()) {
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, getApplicationContext(), mLoaderCallback);
+            Log.d(TAG, "Internal OpenCV library not found. Using Opencv Manager for initialization");
+        }else {
+            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
     }
     @Override
     protected void onDestroy() {
@@ -63,21 +123,18 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
         this.finish();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
     //OpenCV库加载并初始化成功后的回调函数
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
 
         @Override
         public void onManagerConnected(int status) {
             // TODO Auto-generated method stub
-            switch (status){
-                case BaseLoaderCallback.SUCCESS:
-                    Log.i(TAG, "成功加载");
-                    break;
-                default:
-                    super.onManagerConnected(status);
-                    Log.i(TAG, "加载失败");
-                    break;
-            }
+            picturehandle.onManagerConnected(status);
         }
     };
 
@@ -86,6 +143,7 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
         mRecordBtn = (ToggleButton) findViewById(R.id.btn_record);
         mCameraRiseBtn = (Button) findViewById(R.id.btn_camera_rise);
         mCameraDownBtn = (Button) findViewById(R.id.btn_camera_down);
+        mTrackingImage = (ImageView) findViewById(R.id.camera_tracking_send_rect);
 
         mCaptureBtn.setOnClickListener(this);
         mCameraRiseBtn.setOnClickListener(this);
@@ -98,11 +156,9 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    //Bitmap bitmap = mVideoSurface.getBitmap();
-                    //Bitmap matchmap = BitmapFactory.decodeResource(getResources(), R.drawable.match1);
-                   //picturehandle.match(bitmap,matchmap, Imgproc.TM_CCOEFF);
+
                 } else {
-                    new FileSaver().save();
+
                 }
             }
         });
@@ -112,7 +168,8 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_capture:{
-                new FileSaver().save();
+                Bitmap bitmap = mVideoSurface.getBitmap();
+                new FileSaver(bitmap).save();
                 break;
             }
             case R.id.btn_camera_rise:{
@@ -198,19 +255,25 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
     }
 
     private class FileSaver implements Runnable {
+        private Bitmap bitmap;
+        private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+        public FileSaver(Bitmap bitmap){
+            this.bitmap = bitmap;
+        }
         public void save() {
             new Thread(this).start();
         }
         @Override
         public void run() {
             try {
-                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "drone_camera.jpg");
+                Date date = new Date(System.currentTimeMillis());
+                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Drone_IMG_"+simpleDateFormat.format(date)+".jpg");
                 file.createNewFile();
 
                 FileOutputStream os = new FileOutputStream(file);
                 BufferedOutputStream bos = new BufferedOutputStream(os);
 
-                Bitmap bitmap = mVideoSurface.getBitmap();
+                //Bitmap bitmap = mVideoSurface.getBitmap();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
 
                 bos.flush();
@@ -248,6 +311,13 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
                         });
             }
         }
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+        super.onSurfaceTextureUpdated(surface);
+        Bitmap bitmap = mVideoSurface.getBitmap();
+        picturehandle.new Picture_Match(bitmap,myHandler).begin();
     }
 }
 

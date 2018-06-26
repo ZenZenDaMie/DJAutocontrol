@@ -78,7 +78,8 @@ public class MainActivity extends Activity implements OnClickListener{
                 break;
             }
             case R.id.remote_control_button:{
-
+                Intent intent = new Intent(this, RemoteControlActivity.class);
+                startActivity(intent);
                 break;
             }
             case R.id.gps_track_button:{
@@ -102,7 +103,8 @@ public class MainActivity extends Activity implements OnClickListener{
                 break;
             }
             case R.id.site_landing_button:{
-
+                Intent intent = new Intent(this, SiteLandingActivity.class);
+                startActivity(intent);
                 break;
             }
             case R.id.automatic_handle_button:{
