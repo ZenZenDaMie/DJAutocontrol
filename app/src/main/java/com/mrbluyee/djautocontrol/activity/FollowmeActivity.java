@@ -164,9 +164,10 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
         }
         PhoneLocationApplication.initLocation(this);
         LatLng phone_location = gps_converter(new LatLng(PhoneLocationApplication.latitude, PhoneLocationApplication.longitude));
-        aMap.addMarker(new MarkerOptions().position(phone_location).title("phone marker"));
+        aMap.addMarker(new MarkerOptions().position(phone_location).title("phone"));
         CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(phone_location , zoomlevel);
         aMap.moveCamera(cu);
+        aMap.setOnMarkerClickListener(markerClickListener); // 绑定 Marker 被点击事件
     }
 
     @Override
@@ -314,6 +315,7 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
         //Create MarkerOptions object
         final MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(pos);
+        markerOptions.title("drone");
         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.aircraft));
 
         runOnUiThread(new Runnable() {
@@ -330,12 +332,13 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
         });
     }
 
-    private void markchargesite(LatLng point,String title){
+    private void markchargesite(LatLng point,String station_id){
         //Create MarkerOptions object
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(point);
         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.charge_site));
-        markerOptions.title(title);
+        markerOptions.title("charge station");
+        markerOptions.snippet(station_id);
         Marker marker = aMap.addMarker(markerOptions);
         mMarkers.put(mMarkers.size(), marker);
     }
@@ -365,6 +368,24 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
     public void onMapClick(LatLng point){
 
     }
+
+    // 定义 Marker 点击事件监听
+    AMap.OnMarkerClickListener markerClickListener = new AMap.OnMarkerClickListener() {
+        // marker 对象被点击时回调的接口
+        // 返回 true 则表示接口已响应事件，否则返回false
+        @Override
+        public boolean onMarkerClick(Marker marker) {
+            if(marker.getTitle().equals("charge station")){
+                int id = Integer.parseInt(marker.getSnippet());
+                if (stationInfos.indexOfKey(id) != -1) {
+                    if (aMap != null) {
+
+                    }
+                }
+            }
+            return false;
+        }
+    };
 
     private void cameraUpdate(){
         LatLng pos = gps_converter(new LatLng(droneLocationLat, droneLocationLng));
