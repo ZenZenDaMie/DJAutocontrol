@@ -12,8 +12,13 @@ import dji.sdk.mission.tapfly.TapFlyMissionOperator;
 import dji.sdk.mission.tapfly.TapFlyMissionOperatorListener;
 import dji.sdk.sdkmanager.DJISDKManager;
 
+import android.graphics.Bitmap;
 import android.graphics.PointF;
+import android.graphics.SurfaceTexture;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -32,9 +37,15 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mrbluyee.djautocontrol.application.PictureHandle;
 import com.mrbluyee.djautocontrol.utils.StringHandleUtil;
 import com.mrbluyee.djautocontrol.application.FPVActivity;
 import com.mrbluyee.djautocontrol.R;
+
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Rect;
 
 public class TapflyActivity extends FPVActivity implements TextureView.SurfaceTextureListener, View.OnClickListener,View.OnTouchListener {
     private static final String TAG = TapflyActivity.class.getName();
@@ -51,6 +62,10 @@ public class TapflyActivity extends FPVActivity implements TextureView.SurfaceTe
     private Switch mAssisSw;
     private TextView mSpeedTv;
     private SeekBar mSpeedSb;
+    private MyHandler myHandler;
+    private ImageView mTrackingImage;
+    private Rect[] targetsArray = null;
+    private PictureHandle picturehandle = new PictureHandle(this);
 
     private TapFlyMissionOperator getTapFlyOperator() {
         return DJISDKManager.getInstance().getMissionControl().getTapFlyMissionOperator();
@@ -102,11 +117,58 @@ public class TapflyActivity extends FPVActivity implements TextureView.SurfaceTe
                 }
             }
         });
+        myHandler = new MyHandler();
+    }
+
+    class MyHandler extends Handler {
+        public MyHandler() {
+        }
+
+        public MyHandler(Looper L) {
+            super(L);
+        }
+        // 子类必须重写此方法，接受数据
+        @Override
+        public void handleMessage(Message msg) {
+            // TODO Auto-generated method stub
+            super.handleMessage(msg);
+            // 此处可以更新UI
+            Bundle b = msg.getData();
+            targetsArray = (Rect[]) b.getSerializable("picturehandle");
+            if(targetsArray.length > 0){
+                TapflyActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTrackingImage.setX(targetsArray[0].x);
+                        mTrackingImage.setY(targetsArray[0].y);
+                        mTrackingImage.getLayoutParams().width = targetsArray[0].width;
+                        mTrackingImage.getLayoutParams().height = targetsArray[0].height;
+                        mTrackingImage.requestLayout();
+                        mTrackingImage.setVisibility(View.VISIBLE);
+                    }
+                });
+            }else {
+                TapflyActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTrackingImage.setVisibility(View.INVISIBLE);
+                    }
+                });
+            }
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        //load OpenCV engine and init OpenCV library
+        if(!OpenCVLoader.initDebug()) {
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, getApplicationContext(), mLoaderCallback);
+            Log.d(TAG, "Internal OpenCV library not found. Using Opencv Manager for initialization");
+        }else {
+            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
         initTapFlyMission();
     }
 
@@ -127,6 +189,16 @@ public class TapflyActivity extends FPVActivity implements TextureView.SurfaceTe
         Log.d(TAG, "onReturn");
         this.finish();
     }
+
+    //OpenCV库加载并初始化成功后的回调函数
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+
+        @Override
+        public void onManagerConnected(int status) {
+            // TODO Auto-generated method stub
+            picturehandle.onManagerConnected(status);
+        }
+    };
 
     private void setResultToToast(final String string) {
         TapflyActivity.this.runOnUiThread(new Runnable() {
@@ -171,6 +243,7 @@ public class TapflyActivity extends FPVActivity implements TextureView.SurfaceTe
         mAssisSw = (Switch)findViewById(R.id.pointing_assistant_sw);
         mSpeedTv = (TextView)findViewById(R.id.pointing_speed_tv);
         mSpeedSb = (SeekBar)findViewById(R.id.pointing_speed_sb);
+        mTrackingImage = (ImageView) findViewById(R.id.tapfly_tracking_send_rect);
 
         mPushDrawerIb.setOnClickListener(this);
         mStartBtn.setOnClickListener(this);
@@ -301,5 +374,12 @@ public class TapflyActivity extends FPVActivity implements TextureView.SurfaceTe
         } else {
             setResultToToast("TapFlyMission Operator is null");
         }
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+        super.onSurfaceTextureUpdated(surface);
+        Bitmap bitmap = mVideoSurface.getBitmap();
+        picturehandle.new Picture_Match(bitmap,myHandler).begin();
     }
 }

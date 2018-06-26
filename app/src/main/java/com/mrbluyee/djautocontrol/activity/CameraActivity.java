@@ -1,11 +1,12 @@
 package com.mrbluyee.djautocontrol.activity;
 
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.TextureView;
@@ -15,10 +16,21 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ToggleButton;
-import dji.common.error.DJIError;
-import dji.common.gimbal.Rotation;
-import dji.common.gimbal.RotationMode;
-import dji.common.util.CommonCallbacks;
+
+import com.mrbluyee.djautocontrol.R;
+import com.mrbluyee.djautocontrol.application.DJSDKApplication;
+import com.mrbluyee.djautocontrol.application.FPVActivity;
+import com.mrbluyee.djautocontrol.application.PictureHandle;
+import com.mrbluyee.djautocontrol.utils.ModuleVerificationUtil;
+
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.core.Rect;
+import org.opencv.imgproc.Imgproc;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,22 +39,10 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.mrbluyee.djautocontrol.application.FPVActivity;
-import com.mrbluyee.djautocontrol.application.DJSDKApplication;
-import com.mrbluyee.djautocontrol.application.PictureHandle;
-import com.mrbluyee.djautocontrol.utils.ModuleVerificationUtil;
-import com.mrbluyee.djautocontrol.R;
-
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
+import dji.common.error.DJIError;
+import dji.common.gimbal.Rotation;
+import dji.common.gimbal.RotationMode;
+import dji.common.util.CommonCallbacks;
 
 public class CameraActivity extends FPVActivity implements TextureView.SurfaceTextureListener, View.OnClickListener,View.OnTouchListener {
     private static final String TAG = CameraActivity.class.getName();
@@ -52,14 +52,55 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
     private ToggleButton mRecordBtn;
     private PictureHandle picturehandle = new PictureHandle(this);
     private ImageView mTrackingImage;
-    private RelativeLayout mBgLayout;
     private Rect[] targetsArray = null;
+    private MyHandler myHandler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_camera);
         super.onCreate(savedInstanceState);
         initUI();
+        myHandler = new MyHandler();
     }
+
+
+    class MyHandler extends Handler {
+        public MyHandler() {
+        }
+
+        public MyHandler(Looper L) {
+            super(L);
+        }
+        // 子类必须重写此方法，接受数据
+        @Override
+        public void handleMessage(Message msg) {
+            // TODO Auto-generated method stub
+            super.handleMessage(msg);
+            // 此处可以更新UI
+            Bundle b = msg.getData();
+            targetsArray = (Rect[]) b.getSerializable("picturehandle");
+            if(targetsArray.length > 0){
+                CameraActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTrackingImage.setX(targetsArray[0].x);
+                        mTrackingImage.setY(targetsArray[0].y);
+                        mTrackingImage.getLayoutParams().width = targetsArray[0].width;
+                        mTrackingImage.getLayoutParams().height = targetsArray[0].height;
+                        mTrackingImage.requestLayout();
+                        mTrackingImage.setVisibility(View.VISIBLE);
+                    }
+                });
+            }else {
+                CameraActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTrackingImage.setVisibility(View.INVISIBLE);
+                    }
+                });
+            }
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -103,7 +144,6 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
         mCameraRiseBtn = (Button) findViewById(R.id.btn_camera_rise);
         mCameraDownBtn = (Button) findViewById(R.id.btn_camera_down);
         mTrackingImage = (ImageView) findViewById(R.id.camera_tracking_send_rect);
-        mBgLayout = (RelativeLayout)findViewById(R.id.camera_tracking_bg_layout);
 
         mCaptureBtn.setOnClickListener(this);
         mCameraRiseBtn.setOnClickListener(this);
@@ -277,30 +317,7 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
         super.onSurfaceTextureUpdated(surface);
         Bitmap bitmap = mVideoSurface.getBitmap();
-        Mat srcimg = new Mat();
-        Utils.bitmapToMat(bitmap, srcimg);
-        Imgproc.cvtColor(srcimg, srcimg,Imgproc.COLOR_RGBA2GRAY);
-        targetsArray = picturehandle.match(srcimg);
-        if(targetsArray.length > 0){
-            CameraActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mTrackingImage.setX(targetsArray[0].x);
-                    mTrackingImage.setY(targetsArray[0].y);
-                    mTrackingImage.getLayoutParams().width = targetsArray[0].width;
-                    mTrackingImage.getLayoutParams().height = targetsArray[0].height;
-                    mTrackingImage.requestLayout();
-                    mTrackingImage.setVisibility(View.VISIBLE);
-                }
-            });
-        }else {
-            CameraActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mTrackingImage.setVisibility(View.INVISIBLE);
-                }
-            });
-        }
+        picturehandle.new Picture_Match(bitmap,myHandler).begin();
     }
 }
 

@@ -151,25 +151,25 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
 
     @Override
     public void onResume() {
-        Log.e(TAG, "onResume");
+        Log.d(TAG, "onResume");
         super.onResume();
     }
 
     @Override
     public void onPause() {
-        Log.e(TAG, "onPause");
+        Log.d(TAG, "onPause");
         super.onPause();
     }
 
     @Override
     public void onStop() {
-        Log.e(TAG, "onStop");
+        Log.d(TAG, "onStop");
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
-        Log.e(TAG, "onDestroy");
+        Log.d(TAG, "onDestroy");
         unregisterReceiver(mReceiver);
         super.onDestroy();
     }
