@@ -4,7 +4,10 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
+import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -81,6 +84,33 @@ public class PictureHandle extends BaseLoaderCallback {
                 isInit = false;
                 super.onManagerConnected(status);
                 break;
+        }
+    }
+
+    public class Picture_Match implements Runnable{
+        private Bitmap bitmap;
+        private Handler UIHandler;
+        private Rect[] result;
+
+        public void begin() {
+            new Thread(this).start();
+        }
+        public Picture_Match(Bitmap bitmap,Handler UIHandler){
+            this.bitmap = bitmap;
+            this.UIHandler = UIHandler;
+        }
+
+        @Override
+        public void run() {
+            Mat srcimg = new Mat();
+            Utils.bitmapToMat(bitmap, srcimg);
+            Imgproc.cvtColor(srcimg, srcimg,Imgproc.COLOR_RGBA2GRAY);
+            result = match(srcimg);
+            Message msg = new Message();
+            Bundle b = new Bundle();// 存放数据
+            b.putSerializable("picturehandle", result);
+            msg.setData(b);
+            UIHandler.sendMessage(msg);
         }
     }
 

@@ -4,11 +4,17 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    <TextureView
+        android:id="@+id/video_previewer_surface"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center" />
+
     <RelativeLayout
         android:id="@+id/main_title_rl"
         android:layout_width="fill_parent"
-        android:layout_height="40dp"
-        android:background="@android:color/black" >
+        android:layout_height="40dp">
 
         <ImageButton
             android:id="@+id/ReturnBtnMain"
@@ -38,19 +44,22 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="15dp"
-            android:src="@drawable/mission_other_icon"
-            android:background="#ff000000"
-            />
+            android:src="@drawable/mission_other_icon" />
     </RelativeLayout>
 
-    <TextureView
-        android:id="@+id/video_previewer_surface"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/main_title_rl"
-        android:layout_centerInParent="true"
-        android:layout_gravity="center" />
+        android:layout_centerInParent="true"  >
 
+        <ImageView
+            android:id="@+id/tapfly_tracking_send_rect"
+            android:layout_width="150dp"
+            android:layout_height="100dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/visual_track_highconfidence"
+            android:visibility="invisible" />
+    </RelativeLayout>
 
     <SlidingDrawer
         android:id="@+id/pointing_drawer_sd"
