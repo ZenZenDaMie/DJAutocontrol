@@ -121,6 +121,11 @@
             android:name=".activity.RemoteControlActivity"
             android:screenOrientation="portrait" >
         </activity>
+        <activity android:name=".activity.SiteLandingActivity"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        </activity>
     </application>
 
 </manifest>

@@ -92,7 +92,7 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
 
     private Button locate, searh_site, gosite;
 
-    private double droneLocationLat = 181, droneLocationLng = 181;
+    private double droneLocationLat = 121.40533301729, droneLocationLng = 31.322594332605;
     private final Map<Integer, Marker> mMarkers = new ConcurrentHashMap<Integer, Marker>();
     private Marker droneMarker = null;
 
@@ -363,7 +363,7 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
                 break;
             }
             case R.id.followme_gosite:{
-
+                followMeStart();
                 break;
             }
             default:
@@ -432,5 +432,4 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
             Toast.makeText(getApplicationContext(), getFollowMeMissionOperator().getCurrentState().toString(), Toast.LENGTH_SHORT).show();
         }
     }
-
 }

@@ -101,7 +101,8 @@ public class MainActivity extends Activity implements OnClickListener{
                 break;
             }
             case R.id.site_landing_button:{
-
+                Intent intent = new Intent(this, SiteLandingActivity.class);
+                startActivity(intent);
                 break;
             }
             case R.id.automatic_handle_button:{
