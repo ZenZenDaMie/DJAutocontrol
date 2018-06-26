@@ -72,6 +72,8 @@ import dji.thirdparty.rx.schedulers.Schedulers;
 
 
 import com.mrbluyee.djautocontrol.R;
+
+
 import com.mrbluyee.djautocontrol.application.PhoneLocationApplication;
 import com.mrbluyee.djautocontrol.application.DJSDKApplication;
 import com.mrbluyee.djautocontrol.application.WebRequestApplication;
