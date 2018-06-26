@@ -53,6 +53,7 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
     private ImageButton mPushDrawerIb;
     private SlidingDrawer mPushInfoSd;
     private ImageButton mStopBtn;
+    private Button mStartBtn;
     private ImageView mTrackingImage;
     private RelativeLayout mBgLayout;
     private TextView mPushInfoTv;
@@ -108,6 +109,14 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
                         mTrackingrecogImage.getLayoutParams().height = targetsArray[0].height;
                         mTrackingrecogImage.requestLayout();
                         mTrackingrecogImage.setVisibility(View.VISIBLE);
+                        if (mActiveTrackMission != null) {
+                            int x_center = targetsArray[0].x + targetsArray[0].width/2;
+                            int y_center = targetsArray[0].y + targetsArray[0].height/2;
+                            mStartBtn.setX(x_center - mStartBtn.getWidth() / 2);
+                            mStartBtn.setY(y_center  - mStartBtn.getHeight() / 2);
+                            mStartBtn.setVisibility(View.VISIBLE);
+                            mStartBtn.requestLayout();
+                        }
                     }
                 });
             }else {
@@ -115,6 +124,7 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
                     @Override
                     public void run() {
                         mTrackingrecogImage.setVisibility(View.INVISIBLE);
+                        mStartBtn.setVisibility(View.INVISIBLE);
                     }
                 });
             }
@@ -181,6 +191,7 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
     private void initUI() {
         mPushDrawerIb = (ImageButton)findViewById(R.id.tracking_drawer_control_ib);
         mPushInfoSd = (SlidingDrawer)findViewById(R.id.tracking_drawer_sd);
+        mStartBtn = (Button)findViewById(R.id.tracking_start_btn);
         mStopBtn = (ImageButton)findViewById(R.id.tracking_stop_btn);
         mTrackingImage = (ImageView) findViewById(R.id.tracking_rst_rect_iv);
         mBgLayout = (RelativeLayout)findViewById(R.id.tracking_bg_layout);
@@ -194,6 +205,7 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
         mConfirmBtn = (Button)findViewById(R.id.confirm_btn);
         mRejectBtn = (Button)findViewById(R.id.reject_btn);
         mTrackingrecogImage = (ImageView) findViewById(R.id.activetrack_tracking_send_rect);
+        mStartBtn.setOnClickListener(this);
         mStopBtn.setOnClickListener(this);
         mBgLayout.setOnTouchListener(this);
         mPushDrawerIb.setOnClickListener(this);
@@ -430,6 +442,19 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
                     }
                 });
 
+                break;
+            case R.id.tracking_start_btn:
+                RectF rectF = new RectF(targetsArray[0].x,targetsArray[0].y,targetsArray[0].x+targetsArray[0].width,targetsArray[0].y+targetsArray[0].height);
+                mActiveTrackMission = new ActiveTrackMission(rectF, ActiveTrackMode.TRACE);
+
+                getActiveTrackOperator().startTracking(mActiveTrackMission, new CommonCallbacks.CompletionCallback() {
+                    @Override
+                    public void onResult(DJIError error) {
+                        setResultToToast("Start Tracking: " + (error == null
+                                ? "Success"
+                                : error.getDescription()));
+                    }
+                });
                 break;
             case R.id.tracking_drawer_control_ib:
                 if (mPushInfoSd.isOpened()) {
