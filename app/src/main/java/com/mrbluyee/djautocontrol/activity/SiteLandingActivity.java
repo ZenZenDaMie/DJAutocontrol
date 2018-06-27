@@ -180,13 +180,14 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
         float center_x = pic_center_x/parent_rect.width();
         float center_y = pic_center_y/parent_rect.height();
         StringBuffer sb = new StringBuffer();
-        StringHandleUtil.addLineToSB(sb, "ScreenWidth: ", parent_rect.width());
-        StringHandleUtil.addLineToSB(sb, "ScreenHeight: ", parent_rect.height());
-        StringHandleUtil.addLineToSB(sb, "RecogCenter_x: ", pic_center_x);
-        StringHandleUtil.addLineToSB(sb, "RecogCenter_y: ", pic_center_y);
-        StringHandleUtil.addLineToSB(sb, "RecogArea: ", recog_area);
-        StringHandleUtil.addLineToSB(sb, "Focus_x: ", center_x);
-        StringHandleUtil.addLineToSB(sb, "Focus_y: ", center_y);
+        StringHandleUtil.addLineToSB(sb, "ScreenWidth", parent_rect.width());
+        StringHandleUtil.addLineToSB(sb, "ScreenHeight", parent_rect.height());
+        StringHandleUtil.addLineToSB(sb, "RecogCenter_x", pic_center_x);
+        StringHandleUtil.addLineToSB(sb, "RecogCenter_y", pic_center_y);
+        StringHandleUtil.addLineToSB(sb, "RecogArea", recog_area);
+        StringHandleUtil.addLineToSB(sb, "Focus_x", center_x);
+        StringHandleUtil.addLineToSB(sb, "Focus_y", center_y);
+        StringHandleUtil.addLineToSB(sb, "Auto_enable", auto_land_flag);
         setResultToText(sb.toString());
         if(auto_land_flag){
 

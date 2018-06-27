@@ -259,22 +259,22 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
         if (event.getTrackingState() != null) {
             targetState = event.getTrackingState().getState();
         }
-        StringHandleUtil.addLineToSB(sb, "CurrentState: ", currentState);
-        StringHandleUtil.addLineToSB(sb, "PreviousState: ", previousState);
-        StringHandleUtil.addLineToSB(sb, "TargetState: ", targetState);
-        StringHandleUtil.addLineToSB(sb, "Error:", errorInformation);
+        StringHandleUtil.addLineToSB(sb, "CurrentState", currentState);
+        StringHandleUtil.addLineToSB(sb, "PreviousState", previousState);
+        StringHandleUtil.addLineToSB(sb, "TargetState", targetState);
+        StringHandleUtil.addLineToSB(sb, "Error", errorInformation);
 
         ActiveTrackTrackingState trackingState = event.getTrackingState();
         if (trackingState != null) {
             RectF trackingRect = trackingState.getTargetRect();
             if (trackingRect != null) {
 
-                StringHandleUtil.addLineToSB(sb, "Rect center x: ", trackingRect.centerX());
-                StringHandleUtil.addLineToSB(sb, "Rect center y: ", trackingRect.centerY());
-                StringHandleUtil.addLineToSB(sb, "Rect Width: ", trackingRect.width());
-                StringHandleUtil.addLineToSB(sb, "Rect Height: ", trackingRect.height());
+                StringHandleUtil.addLineToSB(sb, "Rect center x", trackingRect.centerX());
+                StringHandleUtil.addLineToSB(sb, "Rect center y", trackingRect.centerY());
+                StringHandleUtil.addLineToSB(sb, "Rect Width", trackingRect.width());
+                StringHandleUtil.addLineToSB(sb, "Rect Height", trackingRect.height());
                 StringHandleUtil.addLineToSB(sb, "Reason", trackingState.getReason().name());
-                StringHandleUtil.addLineToSB(sb, "Target Index: ", trackingState.getTargetIndex());
+                StringHandleUtil.addLineToSB(sb, "Target Index", trackingState.getTargetIndex());
                 StringHandleUtil.addLineToSB(sb, "Target Type", trackingState.getType().name());
                 StringHandleUtil.addLineToSB(sb, "Target State", trackingState.getState().name());
 
