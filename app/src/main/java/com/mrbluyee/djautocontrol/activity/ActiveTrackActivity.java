@@ -109,14 +109,13 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
                         mTrackingrecogImage.getLayoutParams().height = targetsArray[0].height;
                         mTrackingrecogImage.requestLayout();
                         mTrackingrecogImage.setVisibility(View.VISIBLE);
-                        if (mActiveTrackMission != null) {
-                            int x_center = targetsArray[0].x + targetsArray[0].width/2;
-                            int y_center = targetsArray[0].y + targetsArray[0].height/2;
-                            mStartBtn.setX(x_center - mStartBtn.getWidth() / 2);
-                            mStartBtn.setY(y_center  - mStartBtn.getHeight() / 2);
-                            mStartBtn.setVisibility(View.VISIBLE);
-                            mStartBtn.requestLayout();
-                        }
+                        int x_center = targetsArray[0].x + targetsArray[0].width/2;
+                        int y_center = targetsArray[0].y + targetsArray[0].height/2;
+                        mStartBtn.setX(x_center - mStartBtn.getWidth() / 2);
+                        mStartBtn.setY(y_center  - mStartBtn.getHeight() / 2);
+                        mStartBtn.requestLayout();
+                        mStartBtn.setVisibility(View.VISIBLE);
+                        mStartBtn.setClickable(true);
                     }
                 });
             }else {
@@ -125,6 +124,7 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
                     public void run() {
                         mTrackingrecogImage.setVisibility(View.INVISIBLE);
                         mStartBtn.setVisibility(View.INVISIBLE);
+                        mStartBtn.setClickable(false);
                     }
                 });
             }
@@ -207,7 +207,7 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
         mTrackingrecogImage = (ImageView) findViewById(R.id.activetrack_tracking_send_rect);
         mStartBtn.setOnClickListener(this);
         mStopBtn.setOnClickListener(this);
-        mBgLayout.setOnTouchListener(this);
+        //mBgLayout.setOnTouchListener(this);
         mPushDrawerIb.setOnClickListener(this);
         mConfigBtn.setOnClickListener(this);
         mConfirmBtn.setOnClickListener(this);
@@ -283,7 +283,6 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
         }
 
         updateActiveTrackRect(mTrackingImage, event);
-
         ActiveTrackState state = event.getCurrentState();
         if (state == ActiveTrackState.FINDING_TRACKED_TARGET ||
                 state == ActiveTrackState.AIRCRAFT_FOLLOWING ||
@@ -444,17 +443,19 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
 
                 break;
             case R.id.tracking_start_btn:
-                RectF rectF = new RectF(targetsArray[0].x,targetsArray[0].y,targetsArray[0].x+targetsArray[0].width,targetsArray[0].y+targetsArray[0].height);
-                mActiveTrackMission = new ActiveTrackMission(rectF, ActiveTrackMode.TRACE);
+                if(targetsArray.length>0) {
+                    RectF rectF = new RectF(targetsArray[0].x, targetsArray[0].y, targetsArray[0].x + targetsArray[0].width, targetsArray[0].y + targetsArray[0].height);
+                    mActiveTrackMission = new ActiveTrackMission(rectF, ActiveTrackMode.TRACE);
 
-                getActiveTrackOperator().startTracking(mActiveTrackMission, new CommonCallbacks.CompletionCallback() {
-                    @Override
-                    public void onResult(DJIError error) {
-                        setResultToToast("Start Tracking: " + (error == null
-                                ? "Success"
-                                : error.getDescription()));
-                    }
-                });
+                    getActiveTrackOperator().startTracking(mActiveTrackMission, new CommonCallbacks.CompletionCallback() {
+                        @Override
+                        public void onResult(DJIError error) {
+                            setResultToToast("Start Tracking: " + (error == null
+                                    ? "Success"
+                                    : error.getDescription()));
+                        }
+                    });
+                }
                 break;
             case R.id.tracking_drawer_control_ib:
                 if (mPushInfoSd.isOpened()) {

@@ -1,6 +1,7 @@
 package com.mrbluyee.djautocontrol.activity;
 
 import android.graphics.Bitmap;
+import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,24 +10,35 @@ import android.os.Message;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.mrbluyee.djautocontrol.R;
 import com.mrbluyee.djautocontrol.application.FPVActivity;
 import com.mrbluyee.djautocontrol.application.PictureHandle;
+import com.mrbluyee.djautocontrol.application.RemoteControlApplication;
+import com.mrbluyee.djautocontrol.utils.StringHandleUtil;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Rect;
 
+import java.util.Timer;
+
 public class SiteLandingActivity extends FPVActivity implements TextureView.SurfaceTextureListener {
     private static final String TAG = SiteLandingActivity.class.getName();
-
+    private RemoteControlApplication remotecontrol= new RemoteControlApplication (this);
     private PictureHandle picturehandle = new PictureHandle(this);
     private ImageView mTrackingImage;
     private Rect[] targetsArray = null;
+    private ToggleButton mAutolandBtn;
     private MyHandler myHandler;
+    private TextView mPushTv;
+    private boolean auto_land_flag = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_sitelanding);
@@ -61,6 +73,7 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
                         mTrackingImage.getLayoutParams().height = targetsArray[0].height;
                         mTrackingImage.requestLayout();
                         mTrackingImage.setVisibility(View.VISIBLE);
+                        autoLand(targetsArray[0]);
                     }
                 });
             }else {
@@ -99,6 +112,7 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
     @Override
     protected void onPause() {
         super.onPause();
+        remotecontrol.DisableVirtualStick();
     }
 
     //OpenCV库加载并初始化成功后的回调函数
@@ -113,6 +127,20 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
 
     private void initUI() {
         mTrackingImage = (ImageView) findViewById(R.id.landing_tracking_send_rect);
+        mPushTv = (TextView)findViewById(R.id.sitelanding_push_tv);
+        mAutolandBtn = (ToggleButton) findViewById(R.id.auto_land_btn);
+        mAutolandBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    auto_land_flag = true;
+                    remotecontrol.EnableVirtualStick();
+                } else {
+                    auto_land_flag = false;
+                    remotecontrol.DisableVirtualStick();
+                }
+            }
+        });
     }
 
     @Override
@@ -120,5 +148,48 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
         super.onSurfaceTextureUpdated(surface);
         Bitmap bitmap = mVideoSurface.getBitmap();
         picturehandle.new Picture_Match(bitmap,myHandler).begin();
+    }
+
+    private void setResultToToast(final String string) {
+        SiteLandingActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(SiteLandingActivity.this, string, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void setResultToText(final String string) {
+        if (mPushTv == null) {
+            setResultToToast("Push info tv has not be init...");
+        }
+        SiteLandingActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mPushTv.setText(string);
+            }
+        });
+    }
+
+    public void autoLand(Rect pic){
+        android.graphics.Rect parent_rect = new android.graphics.Rect();
+        mVideoSurface.getDrawingRect(parent_rect);
+        float pic_center_x = pic.x + pic.width/2;
+        float pic_center_y = pic.y + pic.height/2;
+        float recog_area = (pic.width * pic.height);
+        float center_x = pic_center_x/parent_rect.width();
+        float center_y = pic_center_y/parent_rect.height();
+        StringBuffer sb = new StringBuffer();
+        StringHandleUtil.addLineToSB(sb, "ScreenWidth: ", parent_rect.width());
+        StringHandleUtil.addLineToSB(sb, "ScreenHeight: ", parent_rect.height());
+        StringHandleUtil.addLineToSB(sb, "RecogCenter_x: ", pic_center_x);
+        StringHandleUtil.addLineToSB(sb, "RecogCenter_y: ", pic_center_y);
+        StringHandleUtil.addLineToSB(sb, "RecogArea: ", recog_area);
+        StringHandleUtil.addLineToSB(sb, "Focus_x: ", center_x);
+        StringHandleUtil.addLineToSB(sb, "Focus_y: ", center_y);
+        setResultToText(sb.toString());
+        if(auto_land_flag){
+
+        }
     }
 }
