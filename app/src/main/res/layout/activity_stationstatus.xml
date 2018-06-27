@@ -79,14 +79,14 @@
                     android:layout_height="wrap_content"/>
 
                 <com.flyco.roundview.RoundTextView style="@style/AppTheme.LabelTitle"
-                    android:id="@+id/readlog"
+                    android:id="@+id/set_target_station"
                     android:textColor="@android:color/white"
                     android:layout_marginTop="5dp"
                     android:paddingTop="10dp"
                     android:paddingLeft="40dp"
                     android:paddingRight="40dp"
                     android:paddingBottom="10dp"
-                    android:text="查看本站日志"
+                    android:text="设置为目标站点"
                     app:rv_strokeWidth="1dp"
                     app:rv_isRadiusHalfHeight="true"
                     app:rv_strokeColor="@android:color/white"

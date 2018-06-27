@@ -25,6 +25,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import com.amap.api.maps2d.AMap;
 import com.amap.api.maps2d.AMap.OnMapClickListener;
 import com.amap.api.maps2d.CameraUpdate;
@@ -76,6 +77,7 @@ import com.mrbluyee.djautocontrol.R;
 
 import com.mrbluyee.djautocontrol.application.PhoneLocationApplication;
 import com.mrbluyee.djautocontrol.application.DJSDKApplication;
+import com.mrbluyee.djautocontrol.application.StationStatusActivity;
 import com.mrbluyee.djautocontrol.application.WebRequestApplication;
 import com.mrbluyee.djautocontrol.utils.AmapToGpsUtil;
 import com.mrbluyee.djautocontrol.utils.ChargeStationInfo;
@@ -384,13 +386,52 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
         // 返回 true 则表示接口已响应事件，否则返回false
         @Override
         public boolean onMarkerClick(Marker marker) {
+            /*
+            int id = Integer.parseInt(marker.getSnippet());
+            ChargeStationInfo chargeStationInfo = stationInfos.valueAt(station_index);
+
+            LatLng station_location = chargeStationInfo.getStationPos();
+
+            Toast.makeText(getApplicationContext(),id+" "+station_index, Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(getApplicationContext(), StationStatusActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putString("stationid",""+id);
+            bundle.putString("longitude",""+station_location.latitude);
+            bundle.putString("latitude",""+station_location.longitude);
+            startActivity(intent);*/
+
             if(marker.getTitle().equals("charge station")){
                 int id = Integer.parseInt(marker.getSnippet());
                 int station_index = stationInfos.indexOfKey(id);
+
                 if (station_index != -1) {
+
+                    //Toast.makeText(getApplicationContext(),id+" "+station_index, Toast.LENGTH_LONG).show();
+
+
                     if (aMap != null) {
                         ChargeStationInfo chargeStationInfo = stationInfos.valueAt(station_index);
                         LatLng station_location = chargeStationInfo.getStationPos();
+                        Intent intent = new Intent(FollowmeActivity.this, StationStatusActivity.class);
+
+                        Bundle bundle = new Bundle();
+                        bundle.putString("stationid",""+id);
+                        bundle.putString("longitude",""+station_location.longitude);
+                        bundle.putString("latitude",""+station_location.latitude);
+                        intent.putExtras(bundle);
+
+                        startActivity(intent);
+
+                        //Intent intent = new Intent(getApplicationContext(), StationStatusActivity.class);
+/*
+                        Bundle bundle = new Bundle();
+                        bundle.putString("stationid",""+id);
+                        bundle.putString("longitude",""+station_location.latitude);
+                        bundle.putString("latitude",""+station_location.longitude);*/
+                        //startActivity(intent);
+                        /*
+                        bundle.putString("longitude",""+marker.getPosition().longitude);
+                        bundle.putString("latitude",""+marker.getPosition().latitude);*/
                     }
                 }
             }

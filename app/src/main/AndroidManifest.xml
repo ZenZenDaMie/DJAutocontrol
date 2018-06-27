@@ -121,6 +121,10 @@
             android:name=".activity.RemoteControlActivity"
             android:screenOrientation="portrait" >
         </activity>
+        <activity
+            android:name=".application.StationStatusActivity"
+            android:screenOrientation="portrait" >
+        </activity>
     </application>
 
 </manifest>
