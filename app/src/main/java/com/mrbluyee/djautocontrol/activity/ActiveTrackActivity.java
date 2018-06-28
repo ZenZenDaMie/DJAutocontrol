@@ -207,7 +207,7 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
         mTrackingrecogImage = (ImageView) findViewById(R.id.activetrack_tracking_send_rect);
         mStartBtn.setOnClickListener(this);
         mStopBtn.setOnClickListener(this);
-        //mBgLayout.setOnTouchListener(this);
+        mBgLayout.setOnTouchListener(this);
         mPushDrawerIb.setOnClickListener(this);
         mConfigBtn.setOnClickListener(this);
         mConfirmBtn.setOnClickListener(this);
