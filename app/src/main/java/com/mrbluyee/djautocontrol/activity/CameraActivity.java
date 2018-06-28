@@ -319,6 +319,7 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
         Bitmap bitmap = mVideoSurface.getBitmap();
         picturehandle.new Picture_Match(bitmap,myHandler).begin();
     }
+
 }
 
 

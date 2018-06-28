@@ -68,6 +68,8 @@ public class MainActivity extends Activity implements OnClickListener{
 
         switch (v.getId()) {
             case R.id.drone_status_button:{
+                Intent intent = new Intent(this, PushDataActivity.class);
+                startActivity(intent);
                 break;
             }
             case R.id.camera_fpv_button:{
@@ -101,7 +103,8 @@ public class MainActivity extends Activity implements OnClickListener{
                 break;
             }
             case R.id.site_landing_button:{
-
+                Intent intent = new Intent(this, SiteLandingActivity.class);
+                startActivity(intent);
                 break;
             }
             case R.id.automatic_handle_button:{

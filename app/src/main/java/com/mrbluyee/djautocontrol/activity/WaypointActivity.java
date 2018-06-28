@@ -78,7 +78,7 @@ public class WaypointActivity extends FragmentActivity implements View.OnClickLi
 
     private boolean isAdd = false;
 
-    private double droneLocationLat = 181, droneLocationLng = 181;
+    private double droneLocationLat = 121.40533301729, droneLocationLng = 31.322594332605;
     private final Map<Integer, Marker> mMarkers = new ConcurrentHashMap<Integer, Marker>();
     private Marker droneMarker = null;
 
@@ -164,6 +164,7 @@ public class WaypointActivity extends FragmentActivity implements View.OnClickLi
         aMap.addMarker(new MarkerOptions().position(phone_location).title("phone marker"));
         CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(phone_location , zoomlevel);
         aMap.moveCamera(cu);
+        aMap.setOnMarkerClickListener(markerClickListener); // 绑定 Marker 被点击事件
     }
 
     @Override
@@ -457,20 +458,31 @@ public class WaypointActivity extends FragmentActivity implements View.OnClickLi
 
     // 定义 Marker 点击事件监听
     AMap.OnMarkerClickListener markerClickListener = new AMap.OnMarkerClickListener() {
-        // marker 对象被点击时回调的接口
-        // 返回 true 则表示接口已响应事件，否则返回false
         @Override
         public boolean onMarkerClick(Marker marker) {
-            if(marker.getTitle().equals("charge station")){
-                int id = Integer.parseInt(marker.getSnippet());
-                if (stationInfos.indexOfKey(id) != -1) {
-                    if (aMap != null) {
-
-                    }
+            if (isAdd == true){
+                LatLng point = marker.getPosition();
+                marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                LatLng gps_point = AmapToGpsUtil.toGPSPoint(point.latitude, point.longitude);
+                Waypoint mWaypoint = new Waypoint(gps_point.latitude, gps_point.longitude, altitude);
+                //Add Waypoints to Waypoint arraylist;
+                if (waypointMissionBuilder != null) {
+                    waypointList.add(mWaypoint);
+                    waypointMissionBuilder.waypointList(waypointList).waypointCount(waypointList.size());
+                }else
+                {
+                    waypointMissionBuilder = new WaypointMission.Builder();
+                    waypointList.add(mWaypoint);
+                    waypointMissionBuilder.waypointList(waypointList).waypointCount(waypointList.size());
                 }
+            }else{
+                setResultToToast("Cannot Add Waypoint");
             }
-            return false;
+            return true;
         }
+        // marker 对象被点击时回调的接口
+        // 返回 true 则表示接口已响应事件，否则返回false
+
     };
 
     private void showSettingDialog(){

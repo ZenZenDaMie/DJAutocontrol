@@ -88,20 +88,20 @@ public class TapflyActivity extends FPVActivity implements TextureView.SurfaceTe
                 String errorInformation = (aggregation.getError() == null ? "null" : aggregation.getError().getDescription()) + "\n";
                 String currentState = aggregation.getCurrentState() == null ? "null" : aggregation.getCurrentState().getName();
                 String previousState = aggregation.getPreviousState() == null ? "null" : aggregation.getPreviousState().getName();
-                StringHandleUtil.addLineToSB(sb, "CurrentState: ", currentState);
-                StringHandleUtil.addLineToSB(sb, "PreviousState: ", previousState);
-                StringHandleUtil.addLineToSB(sb, "Error:", errorInformation);
+                StringHandleUtil.addLineToSB(sb, "CurrentState", currentState);
+                StringHandleUtil.addLineToSB(sb, "PreviousState", previousState);
+                StringHandleUtil.addLineToSB(sb, "Error", errorInformation);
 
                 TapFlyExecutionState progressState = aggregation.getExecutionState();
 
                 if (progressState != null) {
-                    StringHandleUtil.addLineToSB(sb, "Heading: ", progressState.getRelativeHeading());
-                    StringHandleUtil.addLineToSB(sb, "PointX: ", progressState.getImageLocation().x);
-                    StringHandleUtil.addLineToSB(sb, "PointY: ", progressState.getImageLocation().y);
-                    StringHandleUtil.addLineToSB(sb, "BypassDirection: ", progressState.getBypassDirection().name());
-                    StringHandleUtil.addLineToSB(sb, "VectorX: ", progressState.getDirection().getX());
-                    StringHandleUtil.addLineToSB(sb, "VectorY: ", progressState.getDirection().getY());
-                    StringHandleUtil.addLineToSB(sb, "VectorZ: ", progressState.getDirection().getZ());
+                    StringHandleUtil.addLineToSB(sb, "Heading", progressState.getRelativeHeading());
+                    StringHandleUtil.addLineToSB(sb, "PointX", progressState.getImageLocation().x);
+                    StringHandleUtil.addLineToSB(sb, "PointY", progressState.getImageLocation().y);
+                    StringHandleUtil.addLineToSB(sb, "BypassDirection", progressState.getBypassDirection().name());
+                    StringHandleUtil.addLineToSB(sb, "VectorX", progressState.getDirection().getX());
+                    StringHandleUtil.addLineToSB(sb, "VectorY", progressState.getDirection().getY());
+                    StringHandleUtil.addLineToSB(sb, "VectorZ", progressState.getDirection().getZ());
                     setResultToText(sb.toString());
                 }
 

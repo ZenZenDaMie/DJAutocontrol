@@ -74,6 +74,8 @@
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait">
         </activity>
+        <activity android:name=".activity.PushDataActivity">
+        </activity>
         <activity
             android:name=".activity.WaypointActivity"
             android:configChanges="orientation|screenSize"
@@ -121,9 +123,16 @@
             android:name=".activity.RemoteControlActivity"
             android:screenOrientation="portrait" >
         </activity>
+<<<<<<< HEAD
         <activity
             android:name=".application.StationStatusActivity"
             android:screenOrientation="portrait" >
+=======
+        <activity android:name=".activity.SiteLandingActivity"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+>>>>>>> upstream/master
         </activity>
     </application>
 
