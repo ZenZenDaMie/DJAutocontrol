@@ -33,7 +33,7 @@
                 android:id="@+id/locate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Locate"
+                android:text="Drone locate"
                 android:layout_weight="1"/>
             <Button
                 android:id="@+id/followme_search"
@@ -46,6 +46,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Go to site"
+                android:layout_weight="1"/>
+            <Button
+                android:id="@+id/followme_stopmission"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Stop mission"
                 android:layout_weight="1"/>
         </LinearLayout>
         <LinearLayout

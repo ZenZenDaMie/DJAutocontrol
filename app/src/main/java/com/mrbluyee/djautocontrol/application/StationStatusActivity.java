@@ -22,9 +22,6 @@ import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import java.util.Timer;
 import java.util.TimerTask;
 
-
-
-
 /**
  * Created by rsj on 2018/1/12.
  */
@@ -54,6 +51,7 @@ public class StationStatusActivity extends AppCompatActivity {
 
     public MyHandler myHandler;
 
+    private int SET_STATION_AS_TARGET = 2;
     //    public String stationid="112130";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,24 +115,28 @@ public class StationStatusActivity extends AppCompatActivity {
         btn_set_target_station.setOnClickListener(new View.OnClickListener()//侦听登录点击事件
         {
             public void onClick(View v) {//设置目标站点
-                if(stationstatus.equals("0")) {
-                    //充电站空闲
-                }
-                    //三要素
-                    //stationid
-                    //longitude
-                    //latitude
+        if(stationstatus.equals("0")) {
+            //充电站空闲
+            Intent intent = new Intent();
+            intent.putExtra("station_id", stationid);
+            setResult(SET_STATION_AS_TARGET, intent);
+            finish();
+        }
+            //三要素
+            //stationid
+            //longitude
+            //latitude
 
-                /*
-                Intent intent = new Intent(StationStatusActivity.this, .class);
-                //                用Bundle携带数据
-                Bundle bundle = new Bundle();
-                //传递name参数为tinyphp
+        /*
+        Intent intent = new Intent(StationStatusActivity.this, .class);
+        //                用Bundle携带数据
+        Bundle bundle = new Bundle();
+        //传递name参数为tinyphp
 
-                bundle.putString("stationid", stationid);
-                intent.putExtras(bundle);
+        bundle.putString("stationid", stationid);
+        intent.putExtras(bundle);
 
-                startActivity(intent);*/
+        startActivity(intent);*/
             }
         });
 
@@ -152,6 +154,7 @@ public class StationStatusActivity extends AppCompatActivity {
             super.handleMessage(msg);
         };
     };
+
     Timer timer = new Timer();
     TimerTask task = new TimerTask() {
 
