@@ -444,7 +444,12 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
                 break;
             case R.id.tracking_start_btn:
                 if(targetsArray.length>0) {
-                    RectF rectF = new RectF(targetsArray[0].x, targetsArray[0].y, targetsArray[0].x + targetsArray[0].width, targetsArray[0].y + targetsArray[0].height);
+                    RectF rectF = new RectF(
+                            (float)targetsArray[0].x/mBgLayout.getWidth(),
+                            (float)targetsArray[0].y/mBgLayout.getHeight(),
+                            (float)(targetsArray[0].x + targetsArray[0].width)/mBgLayout.getWidth(),
+                            (float)(targetsArray[0].y + targetsArray[0].height)/mBgLayout.getHeight()
+                    );
                     mActiveTrackMission = new ActiveTrackMission(rectF, ActiveTrackMode.TRACE);
 
                     getActiveTrackOperator().startTracking(mActiveTrackMission, new CommonCallbacks.CompletionCallback() {

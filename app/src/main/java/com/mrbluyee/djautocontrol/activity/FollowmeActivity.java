@@ -114,6 +114,10 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
 
     private int STATION_STATUS_CODE = 1;
     private int SET_STATION_AS_TARGET = 2;
+
+    private double latitude_1cm = 1.141255544679108e-5/100;
+    private double longitude_1cm = 8.993216192195822e-6/100;
+
     @Override
     protected void onResume(){
         super.onResume();
@@ -433,25 +437,40 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
             if (followMeMissionOperator.getCurrentState().toString().equals(FollowMeMissionState.READY_TO_EXECUTE.toString())) {
                 //ToDo: You need init or get the location of your moving object which will be followed by the aircraft.
                 if(movingObjectLocation != null) {
-                    followMeMissionOperator.startMission(FollowMeMission.getInstance().initUserData(movingObjectLocation.getLatitude(), movingObjectLocation.getLongitude(), altitude), new CommonCallbacks.CompletionCallback() {
+                    followMeMissionOperator.startMission(FollowMeMission.getInstance().initUserData(droneLocationLat, droneLocationLng, altitude), new CommonCallbacks.CompletionCallback() {
                         @Override
                         public void onResult(DJIError djiError) {
                             setResultToToast("Mission Start: " + (djiError == null ? "Successfully" : djiError.getDescription()));
                         }
                     });
-
                     if (!isRunning.get()) {
                         isRunning.set(true);
                         timmerSubcription = timer.subscribe(new Action1<Long>() {
                             @Override
                             public void call(Long aLong) {
-                                followMeMissionOperator.updateFollowingTarget(new LocationCoordinate2D(movingObjectLocation.getLatitude(), movingObjectLocation.getLongitude()),
-                                        new CommonCallbacks.CompletionCallback() {
-                                            @Override
-                                            public void onResult(DJIError error) {
-                                                isRunning.set(false);
-                                            }
-                                        });
+                                if(movingObjectLocation != null) {
+                                    double now_latitude_different = (droneLocationLat - movingObjectLocation.getLatitude())/latitude_1cm;
+                                    double now_longitude_different = (droneLocationLng -movingObjectLocation.getLongitude())/longitude_1cm;
+                                    double now_latitude = droneLocationLat;
+                                    double now_longitude = droneLocationLng;
+                                    if(now_latitude_different < -10){
+                                        now_latitude = droneLocationLat + latitude_1cm*10;
+                                    }else if(now_latitude_different > 10){
+                                        now_latitude = droneLocationLat - latitude_1cm*10;
+                                    }
+                                    if(now_longitude_different < -10){
+                                        now_longitude = droneLocationLng + longitude_1cm*10;
+                                    }else if(now_longitude_different > 10){
+                                        now_longitude = droneLocationLng - longitude_1cm*10;
+                                    }
+                                    followMeMissionOperator.updateFollowingTarget(new LocationCoordinate2D(now_latitude,  now_longitude),
+                                            new CommonCallbacks.CompletionCallback() {
+                                                @Override
+                                                public void onResult(DJIError error) {
+                                                    isRunning.set(false);
+                                                }
+                                            });
+                                }
                             }
                         });
                     }
