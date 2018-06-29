@@ -123,26 +123,14 @@
             android:name=".activity.RemoteControlActivity"
             android:screenOrientation="portrait" >
         </activity>
-<<<<<<< HEAD
-<<<<<<< HEAD
         <activity
             android:name=".application.StationStatusActivity"
             android:screenOrientation="portrait" >
-=======
-=======
->>>>>>> upstream/master
+        </activity>
         <activity android:name=".activity.SiteLandingActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
-<<<<<<< HEAD
->>>>>>> upstream/master
-=======
-        </activity>
-        <activity
-            android:name=".application.StationStatusActivity"
-            android:screenOrientation="portrait" >
->>>>>>> upstream/master
         </activity>
     </application>
 

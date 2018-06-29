@@ -37,7 +37,7 @@ public class RemoteControlApplication  extends Application {
     public float yaw;//Yaw轴，偏航(角速度)
     public float throttle;//(好像是风速？？)
     public FlightControllerKey isSimulatorActived;
-
+    public boolean lock=false;
     private Context context;
     public RemoteControlApplication (Context context){
         this.context = context;
@@ -78,7 +78,8 @@ public class RemoteControlApplication  extends Application {
                     }
                 });
     }
-    public void Up(int ms){
+    public void Up(int ms,int delayms){
+        lock=true;
         if (throttle < 50) {
             throttle = 2;
         }
@@ -88,8 +89,14 @@ public class RemoteControlApplication  extends Application {
                 throttle=0;
             }
         }, ms);
+        timer.schedule(new TimerTask() {
+            public void run() {
+                lock=false;
+            }
+        }, delayms);
     }
-    public void Down(int ms){
+    public void Down(int ms,int delayms){
+        lock=true;
         if (throttle >=0) {
             throttle = -2;
         }
@@ -99,8 +106,14 @@ public class RemoteControlApplication  extends Application {
                 throttle=0;
             }
         }, ms);
+        timer.schedule(new TimerTask() {
+            public void run() {
+                lock=false;
+            }
+        }, delayms);
     }
-    public void turn_left(int ms){
+    public void turn_left(int ms,int delayms){
+        lock=true;
         yaw = -10f;
         pitch = 0;
         roll = 0;
@@ -114,8 +127,14 @@ public class RemoteControlApplication  extends Application {
                 throttle = 0;
             }
         }, ms);
+        timer.schedule(new TimerTask() {
+            public void run() {
+                lock=false;
+            }
+        }, delayms);
     }
-    public void turn_right(int ms){
+    public void turn_right(int ms,int delayms){
+        lock=true;
         yaw = 10f;
         pitch = 0;
         roll = 0;
@@ -129,8 +148,14 @@ public class RemoteControlApplication  extends Application {
                 throttle = 0;
             }
         }, ms);
+        timer.schedule(new TimerTask() {
+            public void run() {
+                lock=false;
+            }
+        }, delayms);
     }
-    public void left_move(int ms){
+    public void left_move(int ms,int delayms){
+        lock=true;
         yaw = 0;
         pitch = -2;
         roll = 0;
@@ -144,8 +169,14 @@ public class RemoteControlApplication  extends Application {
                 throttle = 0;
             }
         }, ms);
+        timer.schedule(new TimerTask() {
+            public void run() {
+                lock=false;
+            }
+        }, delayms);
     }
-    public void right_move(int ms){
+    public void right_move(int ms,int delayms){
+        lock=true;
         yaw = 0;
         pitch = 2;
         roll = 0;
@@ -159,8 +190,14 @@ public class RemoteControlApplication  extends Application {
                 throttle = 0;
             }
         }, ms);
+        timer.schedule(new TimerTask() {
+            public void run() {
+                lock=false;
+            }
+        }, delayms);
     }
-    public void ahead_move(int ms){
+    public void ahead_move(int ms,int delayms){
+        lock=true;
         yaw = 0;
         pitch = 0;
         roll = 1;
@@ -174,8 +211,14 @@ public class RemoteControlApplication  extends Application {
                 throttle = 0;
             }
         }, ms);
+        timer.schedule(new TimerTask() {
+            public void run() {
+                lock=false;
+            }
+        }, delayms);
     }
-    public void back_move(int ms){
+    public void back_move(int ms,int delayms){
+        lock=true;
         yaw = 0;
         pitch = 0;
         roll = -1;
@@ -189,6 +232,11 @@ public class RemoteControlApplication  extends Application {
                 throttle = 0;
             }
         }, ms);
+        timer.schedule(new TimerTask() {
+            public void run() {
+                lock=false;
+            }
+        }, delayms);
     }
     public class SendVirtualStickDataTask extends TimerTask {
 
