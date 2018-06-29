@@ -39,6 +39,8 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
     private MyHandler myHandler;
     private TextView mPushTv;
     private boolean auto_land_flag = false;
+    private float best_focus_x = 0.5187f;
+    private float best_focus_y = 0.6212f;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_sitelanding);
@@ -190,7 +192,31 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
         StringHandleUtil.addLineToSB(sb, "Auto_enable", auto_land_flag);
         setResultToText(sb.toString());
         if(auto_land_flag){
+            float x_different = center_x - best_focus_x;
+            float y_different = center_y - best_focus_y;
+            boolean land_flag = true;
+            if(x_different > 0.1){ // 往右偏了
+                land_flag = false;
+                remotecontrol.left_move(10);
+                Log.d(TAG, "left move");
+            }else if(x_different < -0.1){ //往左偏了
+                land_flag = false;
+                remotecontrol.right_move(10);
+                Log.d(TAG, "right move");
+            }
+            if(y_different > 0.1){ //往下偏了
+                land_flag = false;
+                remotecontrol.ahead_move(10);
+                Log.d(TAG, "ahead move");
+            }else if(y_different < -0.1){  //往前偏了
+                land_flag = false;
+                remotecontrol.back_move(10);
+                Log.d(TAG, "back move");
+            }
+/*            if(land_flag){
 
+          }
+*/
         }
     }
 }
