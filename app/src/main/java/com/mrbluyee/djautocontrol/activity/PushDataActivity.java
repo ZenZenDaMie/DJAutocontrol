@@ -18,11 +18,11 @@ import dji.sdk.products.Aircraft;
 
 public class PushDataActivity extends Activity {
 
-    private TextView a,b,c,d,m,n;
+    private TextView t,a,b,c,d,m,n,o,p;
     private int charge,vol,cur;
     private double lat,lon;
     private float tem;
-    private String status;
+    private String status,statusb;
     private FlightController mFlightController;
     private static final String TAG = PushDataActivity.class.getName();
     Handler handler=new Handler();
@@ -47,6 +47,11 @@ public class PushDataActivity extends Activity {
                 if (product instanceof Aircraft) {
                     mFlightController = ((Aircraft) product).getFlightController();
                 }
+
+                statusb="连接中";
+            }
+            else{
+                statusb="连接断开！";
             }
             mFlightController.setStateCallback(new FlightControllerState.Callback() {
                 @Override
@@ -64,8 +69,10 @@ public class PushDataActivity extends Activity {
             c.setText("当前电流： "+cur+"mA\n");
             d.setText("电池温度： "+tem+"摄氏度\n");
             m.setText("充电状态： "+status+"\n");
-            n.setText("经度："+lon+"  纬度："+lat);
-            handler.postDelayed(this, 100);
+            n.setText("经度："+lon+"\n");
+            o.setText("纬度："+lat+"\n");
+            p.setText("连接状态："+statusb);
+            handler.postDelayed(this, 10);
         }
 //        @Override
 //        public void run() {
@@ -102,9 +109,9 @@ public class PushDataActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.view_show_osd);
+        setContentView(R.layout.activity_dronestatus);
         initUI();
-        handler.postDelayed(runnable, 100);
+        handler.postDelayed(runnable, 10);
         //a.setText(stringBuffer);
     }
     @Override
@@ -161,13 +168,16 @@ public class PushDataActivity extends Activity {
 //    }
 
     private void initUI(){
-
+        t=(TextView) findViewById(R.id.textt);
         a=(TextView) findViewById(R.id.texta);
         b=(TextView) findViewById(R.id.textb);
         c=(TextView) findViewById(R.id.textc);
         d=(TextView) findViewById(R.id.textd);
         m=(TextView) findViewById(R.id.textm);
         n=(TextView) findViewById(R.id.textn);
+        o=(TextView) findViewById(R.id.texto);
+        p=(TextView) findViewById(R.id.textp);
+        t.setText("\n无人机实时状态参数显示\n");
 
     }
 

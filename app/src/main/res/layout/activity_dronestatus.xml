@@ -7,6 +7,14 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/view_activity_linearLayout2"
         android:orientation="vertical">
+        <TextView
+            android:id="@+id/textt"
+            android:textColor="@color/Red"
+            android:textSize="33sp"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"/>
     <TextView
         android:id="@+id/texta"
         android:textColor="@color/black"
@@ -49,6 +57,22 @@
             android:layout_centerInParent="true"/>
         <TextView
             android:id="@+id/textn"
+            android:textColor="@color/black"
+            android:textSize="25sp"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"/>
+        <TextView
+            android:id="@+id/texto"
+            android:textColor="@color/black"
+            android:textSize="25sp"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"/>
+        <TextView
+            android:id="@+id/textp"
             android:textColor="@color/black"
             android:textSize="25sp"
             android:layout_gravity="center"
