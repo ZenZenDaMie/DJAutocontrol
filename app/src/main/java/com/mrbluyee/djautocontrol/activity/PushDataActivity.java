@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import com.mrbluyee.djautocontrol.R;
 import com.mrbluyee.djautocontrol.application.DJSDKApplication;
+import com.mrbluyee.djautocontrol.utils.ChargeStationInfo;
 
 import dji.common.battery.BatteryState;
 import dji.common.flightcontroller.FlightControllerState;
@@ -25,6 +26,7 @@ public class PushDataActivity extends Activity {
     private String status,statusb;
     private FlightController mFlightController;
     private static final String TAG = PushDataActivity.class.getName();
+    ChargeStationInfo pushinfo = new ChargeStationInfo();
     Handler handler=new Handler();
     Runnable runnable=new Runnable() {
         @Override
@@ -53,6 +55,12 @@ public class PushDataActivity extends Activity {
             else{
                 statusb="连接断开！";
             }
+            pushinfo.setConnect_status(statusb);
+
+            pushinfo.setCharge(charge);
+
+            pushinfo.setTemperature(tem);
+
             mFlightController.setStateCallback(new FlightControllerState.Callback() {
                 @Override
                 public void onUpdate(FlightControllerState djiFlightState) {

@@ -11,6 +11,33 @@ public class ChargeStationInfo {
     private int stationstatus;
     private String station_create_time;
     private String station_update_time;
+    private String connect_status;
+    private int charge;
+    private float temperature;
+
+    public void setTemperature(float tem) {
+        this.temperature = tem;
+    }
+
+    public float getTemperature(){
+        return temperature;
+    }
+
+    public void setCharge(int ch) {
+        this.charge = ch;
+    }
+
+    public int getCharge(){
+        return charge;
+    }
+
+    public String getConnect_status() {
+        return connect_status;
+    }
+
+    public void setConnect_status(String con) {
+        this.connect_status = con;
+    }
 
     public LatLng getStationPos() {
         return station_pos;
