@@ -296,13 +296,15 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
             }
             case R.id.btn_up:{
                 Toast.makeText(this, "start up", Toast.LENGTH_LONG).show();
-                remotecontrol.Up(1000);
+                if(remotecontrol.lock==false) {
+                    remotecontrol.Up(1000, 10000);
+                }
                 //roll=(float)(roll+1);
                 break;
             }
             case R.id.btn_down:{
                 Toast.makeText(this, "start down", Toast.LENGTH_LONG).show();
-                remotecontrol.Down(1000);
+                remotecontrol.Down(1000,2000);
                 /*if (throttle > 1) {
                     throttle = throttle - 1;
                 }
@@ -310,28 +312,30 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
                 break;
             }
             case R.id.btn_left_turn:{
-                remotecontrol.turn_left(1000);
+                if(remotecontrol.lock==false){
+                    remotecontrol.turn_left(1000,10000);
+                }
                 break;
             }
             case R.id.btn_right_turn:{
-                remotecontrol.turn_right(1000);
+                remotecontrol.turn_right(1000,2000);
                 break;
             }
             case R.id.btn_ahead_move:{
-                remotecontrol.ahead_move(1000);
+                remotecontrol.ahead_move(1000,2000);
                 //remotecontrol.
                 break;
             }
             case R.id.btn_back_move: {
-                remotecontrol.back_move(1000);
+                remotecontrol.back_move(1000,2000);
                 break;
             }
             case R.id.btn_left_move:{
-                remotecontrol.left_move(1000);
+                remotecontrol.left_move(1000,2000);
                 break;
             }
             case R.id.btn_right_move:{
-                remotecontrol.right_move(1000);
+                remotecontrol.right_move(1000,2000);
                 break;
             }
         }

@@ -209,5 +209,20 @@
 
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true">
+        <Button
+            android:id="@+id/tracking_start_btn"
+            android:background="@drawable/pointing_start"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:textSize="15sp"
+            android:visibility="invisible"
+            android:text="Track" />
+
+    </RelativeLayout>
 
 </RelativeLayout>

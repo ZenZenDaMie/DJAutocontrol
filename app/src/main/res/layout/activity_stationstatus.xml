@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorPrimary"
+    tools:conttex="com.mrbluyee.djautocontrol.application.StationStatusActivity">
+
+    <com.scwang.smartrefresh.layout.SmartRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/refreshLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:srlEnablePureScrollMode="false"
+        app:srlEnableLoadmore="true"
+        app:srlDragRate="1">
+        <com.scwang.smartrefresh.layout.header.ClassicsHeader
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <LinearLayout
+                android:id="@+id/profile"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_marginTop="70dp"
+                    app:civ_border_width="2dp"
+                    app:civ_border_color="@android:color/white"
+                    android:src="@mipmap/qqq1"/>
+
+                <TextView  style="@style/AppTheme.TitleLarge"
+                    android:id="@+id/textid"
+                    android:layout_marginTop="@dimen/padding_common"
+                    android:textColor="@android:color/white"
+                    android:text="充电站ID："
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView  style="@style/AppTheme.TitleLarge"
+                    android:id="@+id/textlon"
+                    android:layout_marginTop="6dp"
+                    android:textColor="@android:color/white"
+                    android:text="充电站位置："
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView  style="@style/AppTheme.TitleLarge"
+                    android:id="@+id/textlat"
+                    android:layout_marginTop="6dp"
+                    android:textColor="@android:color/white"
+                    android:text="充电站位置："
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView  style="@style/AppTheme.Discription"
+                    android:layout_marginTop="5dp"
+                    android:textColor="@android:color/white"
+                    android:text="版权所属"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView  style="@style/AppTheme.Discription"
+                    android:layout_marginTop="3dp"
+                    android:textColor="@android:color/white"
+                    android:text="The Copyright of the Evil Fish Studio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <com.flyco.roundview.RoundTextView style="@style/AppTheme.LabelTitle"
+                    android:id="@+id/set_target_station"
+                    android:textColor="@android:color/white"
+                    android:layout_marginTop="5dp"
+                    android:paddingTop="10dp"
+                    android:paddingLeft="40dp"
+                    android:paddingRight="40dp"
+                    android:paddingBottom="10dp"
+                    android:text="设置为目标站点"
+                    app:rv_strokeWidth="1dp"
+                    app:rv_isRadiusHalfHeight="true"
+                    app:rv_strokeColor="@android:color/white"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="25dp"
+                android:paddingTop="15dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:paddingBottom="15dp"
+                android:background="#44ffffff">
+                <com.flyco.roundview.RoundFrameLayout
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    app:rv_isRadiusHalfHeight="true"
+                    app:rv_backgroundColor="#2894ff">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="@dimen/padding_common"
+                        android:contentDescription="@string/app_name"
+                        app:srcCompat="@drawable/ic_star_black_24dp"/>
+                </com.flyco.roundview.RoundFrameLayout>
+                <TextView style="@style/AppTheme.LabelTitle"
+                    android:id="@+id/text1"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginRight="30dp"
+                    android:text="Show My Floder"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:paddingBottom="15dp"
+                android:background="#77ffffff">
+                <com.flyco.roundview.RoundFrameLayout
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    app:rv_isRadiusHalfHeight="true"
+                    app:rv_backgroundColor="#0080ff">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="@dimen/padding_common"
+                        android:contentDescription="@string/app_name"
+                        app:srcCompat="@drawable/ic_battery_charging_24dp"/>
+                </com.flyco.roundview.RoundFrameLayout>
+                <TextView style="@style/AppTheme.LabelTitle"
+                    android:id="@+id/text2"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginRight="30dp"
+                    android:text="Show My Poll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:paddingBottom="15dp"
+                android:background="#aaffffff">
+                <com.flyco.roundview.RoundFrameLayout
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    app:rv_isRadiusHalfHeight="true"
+                    app:rv_backgroundColor="#0072e3">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="@dimen/padding_common"
+                        android:contentDescription="@string/app_name"
+                        app:srcCompat="@drawable/ic_fly_refresh_smartphone"/>
+                </com.flyco.roundview.RoundFrameLayout>
+                <TextView style="@style/AppTheme.LabelTitle"
+                    android:id="@+id/text3"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginRight="30dp"
+                    android:text="Show My Phoe"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:paddingBottom="15dp"
+                android:background="#ddffffff">
+                <com.flyco.roundview.RoundFrameLayout
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    app:rv_isRadiusHalfHeight="true"
+                    app:rv_backgroundColor="#005AB5">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="@dimen/padding_common"
+                        android:contentDescription="@string/app_name"
+                        app:srcCompat="@drawable/ic_fly_refresh_send"/>
+                </com.flyco.roundview.RoundFrameLayout>
+                <TextView style="@style/AppTheme.LabelTitle"
+                    android:id="@+id/text4"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginRight="30dp"
+                    android:text="Show My Idea"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+    <com.github.mmin18.widget.RealtimeBlurView
+        android:id="@+id/blurview"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:visibility="invisible"
+        app:realtimeOverlayColor="@android:color/transparent"/>
+
+    <android.support.v7.widget.Toolbar style="@style/AppTheme.Toolbar"
+        android:id="@+id/toolbar"
+        android:background="@android:color/transparent"
+        app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
+        app:title="充电站详情"/>
+
+</FrameLayout>

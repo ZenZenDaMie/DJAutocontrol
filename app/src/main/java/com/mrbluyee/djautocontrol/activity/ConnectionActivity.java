@@ -32,6 +32,7 @@ import dji.sdk.sdkmanager.DJISDKManager;
 
 import com.mrbluyee.djautocontrol.R;
 import com.mrbluyee.djautocontrol.application.DJSDKApplication;
+import com.mrbluyee.djautocontrol.application.StationStatusActivity;
 
 public class ConnectionActivity extends Activity implements View.OnClickListener {
 
@@ -41,6 +42,8 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
     private TextView mTextProduct;
     private TextView mVersionTv;
     private Button mBtnOpen;
+
+    //private Button mBtnTest;
     private static final String[] REQUIRED_PERMISSION_LIST = new String[]{
             Manifest.permission.VIBRATE,
             Manifest.permission.INTERNET,
@@ -183,6 +186,10 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
         mBtnOpen.setEnabled(false);
         mVersionTv = (TextView) findViewById(R.id.textView2);
         mVersionTv.setText(getResources().getString(R.string.sdk_version, DJISDKManager.getInstance().getSDKVersion()));
+
+        //mBtnTest=(Button) findViewById(R.id.btn_test);
+        //mBtnTest.setOnClickListener(this);
+
     }
 
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -229,6 +236,11 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
                 startActivity(intent);
                 break;
             }
+            /*
+            case R.id.btn_test:{
+                Intent intent = new Intent(this, FollowmeActivity.class);
+                startActivity(intent);
+            }*/
             default:
                 break;
         }
