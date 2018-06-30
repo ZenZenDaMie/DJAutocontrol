@@ -101,6 +101,7 @@ public class CameraActivity extends FPVActivity implements TextureView.SurfaceTe
         }
     }
 
+
     @Override
     protected void onResume() {
         super.onResume();

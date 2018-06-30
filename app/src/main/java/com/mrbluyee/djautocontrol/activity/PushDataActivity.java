@@ -115,6 +115,7 @@ public class PushDataActivity extends Activity {
                         cur = djiBatteryState.getCurrent();
                         tem = djiBatteryState.getTemperature();
                         status=cur>0?"充电中！":"放电中";
+                        statusb="连接中";
                         updateUI();
                     }
                 });
