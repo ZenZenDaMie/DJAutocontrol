@@ -197,20 +197,20 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
             boolean land_flag = true;
             if(x_different > 0.1){ // 往右偏了
                 land_flag = false;
-                remotecontrol.left_move(10);
+                remotecontrol.left_move(10,1000);
                 Log.d(TAG, "left move");
             }else if(x_different < -0.1){ //往左偏了
                 land_flag = false;
-                remotecontrol.right_move(10);
+                remotecontrol.right_move(10,1000);
                 Log.d(TAG, "right move");
             }
             if(y_different > 0.1){ //往下偏了
                 land_flag = false;
-                remotecontrol.ahead_move(10);
+                remotecontrol.ahead_move(10,1000);
                 Log.d(TAG, "ahead move");
             }else if(y_different < -0.1){  //往前偏了
                 land_flag = false;
-                remotecontrol.back_move(10);
+                remotecontrol.back_move(10,1000);
                 Log.d(TAG, "back move");
             }
 /*            if(land_flag){
