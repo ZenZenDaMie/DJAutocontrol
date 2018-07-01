@@ -155,6 +155,7 @@ public class WebRequestApplication {
                     if (response.isSuccessful()) {
                         Log.d("getdroneinfo","response.code()=="+response.code());
                         result = response.body().string();
+                        //Log.d("getdroneinfo","response.body()=="+result);
                         JSONObject object = new JSONObject(result);
                         if(object.has("uavid")){
                             String uavid = object.getString("uavid");

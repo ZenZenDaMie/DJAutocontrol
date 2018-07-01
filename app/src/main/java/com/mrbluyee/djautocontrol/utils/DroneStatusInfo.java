@@ -1,10 +1,20 @@
 package com.mrbluyee.djautocontrol.utils;
 
 public class DroneStatusInfo {
-    private String connect_status,charge_status;
+    private String drone_id;
+    private int connect_status,charge_status;
     private int charge,voltage,current;
     private float temperature;
     private double longitude,latitude;
+
+    public void setDrone_id(String drone_id){
+        this.drone_id = drone_id;
+    }
+
+    public String getDrone_id() {
+        return drone_id;
+    }
+
     public void setTemperature(float tem) {
         this.temperature = tem;
     }
@@ -21,11 +31,11 @@ public class DroneStatusInfo {
         return charge;
     }
 
-    public String getConnect_status() {
+    public int getConnect_status() {
         return connect_status;
     }
 
-    public void setConnect_status(String con) {
+    public void setConnect_status(int con) {
         this.connect_status = con;
     }
 
@@ -62,11 +72,11 @@ public class DroneStatusInfo {
         return current;
     }
 
-    public String getCharge_status() {
+    public int getCharge_status() {
         return charge_status;
     }
 
-    public void setCharge_status(String cs) {
+    public void setCharge_status(int cs) {
         this.charge_status = cs;
     }
 
