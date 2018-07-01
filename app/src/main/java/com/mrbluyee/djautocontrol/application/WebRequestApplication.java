@@ -20,8 +20,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import dji.thirdparty.okhttp3.FormBody;
+import dji.thirdparty.okhttp3.MediaType;
 import dji.thirdparty.okhttp3.OkHttpClient;
 import dji.thirdparty.okhttp3.Request;
+import dji.thirdparty.okhttp3.RequestBody;
 import dji.thirdparty.okhttp3.Response;
 import okhttp3.Call;
 
@@ -41,7 +44,6 @@ public class WebRequestApplication {
                     response = client.newCall(request).execute();//得到Response 对象
                     if (response.isSuccessful()) {
                         Log.d("getgps","response.code()=="+response.code());
-                        Log.d("getgps","response.message()=="+response.message());
                         result = response.body().string();
                         Message msg = new Message();
                         Bundle b = new Bundle();// 存放数据
@@ -137,4 +139,68 @@ public class WebRequestApplication {
         }).start();
     }
 
+    public void Get_chargesite_drone_info(final Handler UIHandler){
+        new Thread(new Runnable() {
+            String  url = "http://139.196.138.204/tp5/public/station/getuav?uavid=saas&stationid=112130";
+            String result = null;
+            @Override
+            public void run() {
+                try {
+                    OkHttpClient client = new OkHttpClient();//创建OkHttpClient对象
+                    Request request = new Request.Builder()
+                            .url(url)//请求接口。如果需要传参拼接到接口后面。
+                            .build();//创建Request 对象
+                    Response response = null;
+                    response = client.newCall(request).execute();//得到Response 对象
+                    if (response.isSuccessful()) {
+                        Log.d("getdroneinfo","response.code()=="+response.code());
+                        result = response.body().string();
+                        JSONObject object = new JSONObject(result);
+                        if(object.has("uavid")){
+                            String uavid = object.getString("uavid");
+                            Message msg = new Message();
+                            Bundle b = new Bundle();// 存放数据
+                            b.putString("uavid", uavid);
+                            msg.setData(b);
+                            UIHandler.sendMessage(msg);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    public void Post_drone_info(final String droneinfo) {
+        new Thread(new Runnable() {
+            String url = "http://139.196.138.204/tp5/public/station/updateuav";
+            String result = null;
+
+            @Override
+            public void run() {
+                try {
+                    OkHttpUtils
+                            .postString()
+                            .url(url)
+                            .content(droneinfo)
+                            .mediaType(okhttp3.MediaType.parse("application/x-www-form-urlencoded"))
+                            .build()
+                            .execute(new StringCallback() {
+                                @Override
+                                public void onError(Call call, Exception e) {
+                                    Log.e("MyHttpHandler", "post Error: " + e.getMessage());
+                                }
+
+                                @Override
+                                public void onResponse(String _response) {
+                                    Log.i("MyHttpHandler", "post response: " + _response);
+                                }
+                            });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
 }
