@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 import com.mrbluyee.djautocontrol.R;
 import com.mrbluyee.djautocontrol.application.DJSDKApplication;
+import com.mrbluyee.djautocontrol.utils.ChargeStationInfo;
+import com.mrbluyee.djautocontrol.utils.DroneStatusInfo;
 
 import dji.common.battery.BatteryState;
 import dji.common.flightcontroller.FlightControllerState;
@@ -31,13 +33,13 @@ public class PushDataActivity extends Activity {
     private String status,statusb;
     private BaseProduct mproduct = null;
     private FlightController mFlightController = null;
+    private DroneStatusInfo DS=null;
     private static final String TAG = PushDataActivity.class.getName();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dronestatus);
-
+        DroneStatusInfo DS=new DroneStatusInfo();
         IntentFilter filter = new IntentFilter();
         filter.addAction(DJSDKApplication.FLAG_CONNECTION_CHANGE);
         registerReceiver(mReceiver, filter);
@@ -93,7 +95,7 @@ public class PushDataActivity extends Activity {
                 a.setText("电池电量： "+charge+"%\n");
                 b.setText("当前电压： "+vol+"mV\n");
                 c.setText("当前电流： "+cur+"mA\n");
-                d.setText("电池温度： "+tem+"摄氏度\n");
+               // d.setText("电池温度： "+tem+"摄氏度\n");
                 m.setText("充电状态： "+status+"\n");
                 n.setText("经度："+lon+"\n");
                 o.setText("纬度："+lat+"\n");
@@ -113,7 +115,7 @@ public class PushDataActivity extends Activity {
                         charge = djiBatteryState.getChargeRemainingInPercent();
                         vol = djiBatteryState.getVoltage();
                         cur = djiBatteryState.getCurrent();
-                        tem = djiBatteryState.getTemperature();
+                        DS.setTemperature(djiBatteryState.getTemperature());
                         status=cur>0?"充电中！":"放电中";
                         if(mproduct.isConnected()){
                             statusb="连接中";
