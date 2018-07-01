@@ -39,8 +39,10 @@ public class PictureHandle extends BaseLoaderCallback {
     public static final int JAVA_DETECTOR = 0;
     private boolean isInit = false;
     private Context context;
-    private File mCascadeFile;
-    private CascadeClassifier mJavaDetector;
+    private File mCascade1File;
+    private File mCascade2File;
+    private CascadeClassifier mJavaDetector1;
+    private CascadeClassifier mJavaDetector2;
     private int  mDetectorType = JAVA_DETECTOR;
     public float mRelativeTargetSize   = 0.2f;
     public int mAbsoluteTargetSize = 0;
@@ -55,10 +57,10 @@ public class PictureHandle extends BaseLoaderCallback {
                 isInit = true;
                 try {
                     // load cascade file from application resources
-                    InputStream is = context.getResources().openRawResource(R.raw.cascade);
-                    File cascadeDir = context.getDir("cascade", Context.MODE_PRIVATE);
-                    mCascadeFile = new File(cascadeDir, "cascade.xml");
-                    FileOutputStream os = new FileOutputStream(mCascadeFile);
+                    InputStream is = context.getResources().openRawResource(R.raw.cascade1);
+                    File cascade1Dir = context.getDir("cascade1", Context.MODE_PRIVATE);
+                    mCascade1File = new File(cascade1Dir, "cascade1.xml");
+                    FileOutputStream os = new FileOutputStream(mCascade1File);
 
                     byte[] buffer = new byte[4096];
                     int bytesRead;
@@ -68,13 +70,36 @@ public class PictureHandle extends BaseLoaderCallback {
                     is.close();
                     os.close();
 
-                    mJavaDetector = new CascadeClassifier(mCascadeFile.getAbsolutePath());
-                    if (mJavaDetector.empty()) {
+                    // load cascade file from application resources
+                    InputStream ise = context.getResources().openRawResource(R.raw.cascade2);
+                    File cascade2Dir = context.getDir("cascade2", Context.MODE_PRIVATE);
+                    mCascade2File = new File(cascade2Dir, "cascade2.xml");
+                    FileOutputStream ose = new FileOutputStream(mCascade2File);
+
+                    while ((bytesRead = ise.read(buffer)) != -1) {
+                        ose.write(buffer, 0, bytesRead);
+                    }
+
+                    ise.close();
+                    ose.close();
+
+                    mJavaDetector1 = new CascadeClassifier(mCascade1File.getAbsolutePath());
+                    if (mJavaDetector1.empty()) {
                         Log.e(TAG, "Failed to load cascade classifier");
-                        mJavaDetector = null;
+                        mJavaDetector1 = null;
                     } else
-                        Log.i(TAG, "Loaded cascade classifier from " + mCascadeFile.getAbsolutePath());
-                    cascadeDir.delete();
+                        Log.i(TAG, "Loaded cascade classifier from " + mCascade1File.getAbsolutePath());
+
+                    mJavaDetector2 = new CascadeClassifier(mCascade2File.getAbsolutePath());
+                    if (mJavaDetector2.empty()) {
+                        Log.e(TAG, "Failed to load cascade classifier");
+                        mJavaDetector2 = null;
+                    } else {
+                        Log.i(TAG, "Loaded cascade classifier from " + mCascade2File.getAbsolutePath());
+                    }
+
+                    cascade1Dir.delete();
+                    cascade2Dir.delete();
                 } catch (IOException e) {
                     e.printStackTrace();
                     Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
@@ -87,7 +112,7 @@ public class PictureHandle extends BaseLoaderCallback {
         }
     }
 
-    public class Picture_Match implements Runnable{
+    public class Picture_Detector1 implements Runnable{
         private Bitmap bitmap;
         private Handler UIHandler;
         private Rect[] result;
@@ -95,7 +120,7 @@ public class PictureHandle extends BaseLoaderCallback {
         public void begin() {
             new Thread(this).start();
         }
-        public Picture_Match(Bitmap bitmap,Handler UIHandler){
+        public Picture_Detector1(Bitmap bitmap,Handler UIHandler){
             this.bitmap = bitmap;
             this.UIHandler = UIHandler;
         }
@@ -105,16 +130,16 @@ public class PictureHandle extends BaseLoaderCallback {
             Mat srcimg = new Mat();
             Utils.bitmapToMat(bitmap, srcimg);
             Imgproc.cvtColor(srcimg, srcimg,Imgproc.COLOR_RGBA2GRAY);
-            result = match(srcimg);
+            result = detector1(srcimg);
             Message msg = new Message();
             Bundle b = new Bundle();// 存放数据
-            b.putSerializable("picturehandle", result);
+            b.putSerializable("picturedetector1", result);
             msg.setData(b);
             UIHandler.sendMessage(msg);
         }
     }
 
-    public Rect[] match(Mat srcimg) {
+    public Rect[] detector1(Mat srcimg) {
         if (mAbsoluteTargetSize == 0) {
             int height = srcimg.rows();
             if (Math.round(height * mRelativeTargetSize) > 0) {
@@ -123,8 +148,54 @@ public class PictureHandle extends BaseLoaderCallback {
         }
         MatOfRect targets = new MatOfRect();
         if (mDetectorType == JAVA_DETECTOR) {
-            if (mJavaDetector != null)
-                mJavaDetector.detectMultiScale(srcimg, targets, 1.1, 3, 2, // TODO: objdetect.CV_HAAR_SCALE_IMAGE
+            if (mJavaDetector1 != null)
+                mJavaDetector1.detectMultiScale(srcimg, targets, 1.1, 6, 2, // TODO: objdetect.CV_HAAR_SCALE_IMAGE
+                        new Size(mAbsoluteTargetSize, mAbsoluteTargetSize), new Size());
+        }
+        else {
+            Log.e(TAG, "Detection method is not selected!");
+        }
+        return targets.toArray();
+    }
+
+    public class Picture_Detector2 implements Runnable{
+        private Bitmap bitmap;
+        private Handler UIHandler;
+        private Rect[] result;
+
+        public void begin() {
+            new Thread(this).start();
+        }
+        public Picture_Detector2(Bitmap bitmap,Handler UIHandler){
+            this.bitmap = bitmap;
+            this.UIHandler = UIHandler;
+        }
+
+        @Override
+        public void run() {
+            Mat srcimg = new Mat();
+            Utils.bitmapToMat(bitmap, srcimg);
+            Imgproc.cvtColor(srcimg, srcimg,Imgproc.COLOR_RGBA2GRAY);
+            result = detector2(srcimg);
+            Message msg = new Message();
+            Bundle b = new Bundle();// 存放数据
+            b.putSerializable("picturedetector2", result);
+            msg.setData(b);
+            UIHandler.sendMessage(msg);
+        }
+    }
+
+    public Rect[] detector2(Mat srcimg) {
+        if (mAbsoluteTargetSize == 0) {
+            int height = srcimg.rows();
+            if (Math.round(height * mRelativeTargetSize) > 0) {
+                mAbsoluteTargetSize = Math.round(height * mRelativeTargetSize);
+            }
+        }
+        MatOfRect targets = new MatOfRect();
+        if (mDetectorType == JAVA_DETECTOR) {
+            if (mJavaDetector2 != null)
+                mJavaDetector2.detectMultiScale(srcimg, targets, 1.1, 3, 2, // TODO: objdetect.CV_HAAR_SCALE_IMAGE
                         new Size(mAbsoluteTargetSize, mAbsoluteTargetSize), new Size());
         }
         else {

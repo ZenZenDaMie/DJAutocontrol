@@ -65,9 +65,12 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
     private Button mConfigBtn;
     private Button mConfirmBtn;
     private Button mRejectBtn;
-    private MyHandler myHandler;
-    private ImageView mTrackingrecogImage;
-    private Rect[] targetsArray = null;
+    private MyHandler1 myHandler1;
+    private MyHandler2 myHandler2;
+    private ImageView mTrackingrecogImage1;
+    private ImageView mTrackingrecogImage2;
+    private Rect[] targets1Array = null;
+    private Rect[] targets2Array = null;
     private PictureHandle picturehandle = new PictureHandle(this);
     // flags
     private boolean isDrawingRect = false;
@@ -82,13 +85,14 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
         super.onCreate(savedInstanceState);
         initUI();
         getActiveTrackOperator().addListener(this);
-        myHandler = new MyHandler();
+        myHandler1 = new MyHandler1();
+        myHandler2 = new MyHandler2();
     }
-    class MyHandler extends Handler {
-        public MyHandler() {
+    class MyHandler1 extends Handler {
+        public MyHandler1() {
         }
 
-        public MyHandler(Looper L) {
+        public MyHandler1(Looper L) {
             super(L);
         }
         // 子类必须重写此方法，接受数据
@@ -98,19 +102,19 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
             super.handleMessage(msg);
             // 此处可以更新UI
             Bundle b = msg.getData();
-            targetsArray = (Rect[]) b.getSerializable("picturehandle");
-            if(targetsArray.length > 0){
+            targets1Array = (Rect[]) b.getSerializable("picturedetector1");
+            if(targets1Array.length > 0){
                 ActiveTrackActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mTrackingrecogImage.setX(targetsArray[0].x);
-                        mTrackingrecogImage.setY(targetsArray[0].y);
-                        mTrackingrecogImage.getLayoutParams().width = targetsArray[0].width;
-                        mTrackingrecogImage.getLayoutParams().height = targetsArray[0].height;
-                        mTrackingrecogImage.requestLayout();
-                        mTrackingrecogImage.setVisibility(View.VISIBLE);
-                        int x_center = targetsArray[0].x + targetsArray[0].width/2;
-                        int y_center = targetsArray[0].y + targetsArray[0].height/2;
+                        mTrackingrecogImage1.setX(targets1Array[0].x);
+                        mTrackingrecogImage1.setY(targets1Array[0].y);
+                        mTrackingrecogImage1.getLayoutParams().width = targets1Array[0].width;
+                        mTrackingrecogImage1.getLayoutParams().height = targets1Array[0].height;
+                        mTrackingrecogImage1.requestLayout();
+                        mTrackingrecogImage1.setVisibility(View.VISIBLE);
+                        int x_center = targets1Array[0].x + targets1Array[0].width/2;
+                        int y_center = targets1Array[0].y + targets1Array[0].height/2;
                         mStartBtn.setX(x_center - mStartBtn.getWidth() / 2);
                         mStartBtn.setY(y_center  - mStartBtn.getHeight() / 2);
                         mStartBtn.requestLayout();
@@ -122,9 +126,46 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
                 ActiveTrackActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mTrackingrecogImage.setVisibility(View.INVISIBLE);
+                        mTrackingrecogImage1.setVisibility(View.INVISIBLE);
                         mStartBtn.setVisibility(View.INVISIBLE);
                         mStartBtn.setClickable(false);
+                    }
+                });
+            }
+        }
+    }
+    class MyHandler2 extends Handler {
+        public MyHandler2() {
+        }
+
+        public MyHandler2(Looper L) {
+            super(L);
+        }
+        // 子类必须重写此方法，接受数据
+        @Override
+        public void handleMessage(Message msg) {
+            // TODO Auto-generated method stub
+            super.handleMessage(msg);
+            // 此处可以更新UI
+            Bundle b = msg.getData();
+            targets2Array = (Rect[]) b.getSerializable("picturedetector2");
+            if(targets2Array.length > 0){
+                ActiveTrackActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTrackingrecogImage2.setX(targets2Array[0].x);
+                        mTrackingrecogImage2.setY(targets2Array[0].y);
+                        mTrackingrecogImage2.getLayoutParams().width = targets2Array[0].width;
+                        mTrackingrecogImage2.getLayoutParams().height = targets2Array[0].height;
+                        mTrackingrecogImage2.requestLayout();
+                        mTrackingrecogImage2.setVisibility(View.VISIBLE);
+                    }
+                });
+            }else {
+                ActiveTrackActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTrackingrecogImage2.setVisibility(View.INVISIBLE);
                     }
                 });
             }
@@ -204,7 +245,8 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
         mConfigBtn = (Button)findViewById(R.id.recommended_configuration_btn);
         mConfirmBtn = (Button)findViewById(R.id.confirm_btn);
         mRejectBtn = (Button)findViewById(R.id.reject_btn);
-        mTrackingrecogImage = (ImageView) findViewById(R.id.activetrack_tracking_send_rect);
+        mTrackingrecogImage1 = (ImageView) findViewById(R.id.activetrack_tracking_send_rect);
+        mTrackingrecogImage2 = (ImageView) findViewById(R.id.activetrack_tracking_small_rect);
         mStartBtn.setOnClickListener(this);
         mStopBtn.setOnClickListener(this);
         mBgLayout.setOnTouchListener(this);
@@ -443,12 +485,12 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
 
                 break;
             case R.id.tracking_start_btn:
-                if(targetsArray.length>0) {
+                if(targets1Array.length>0) {
                     RectF rectF = new RectF(
-                            (float)targetsArray[0].x/mBgLayout.getWidth(),
-                            (float)targetsArray[0].y/mBgLayout.getHeight(),
-                            (float)(targetsArray[0].x + targetsArray[0].width)/mBgLayout.getWidth(),
-                            (float)(targetsArray[0].y + targetsArray[0].height)/mBgLayout.getHeight()
+                            (float)targets1Array[0].x/mBgLayout.getWidth(),
+                            (float)targets1Array[0].y/mBgLayout.getHeight(),
+                            (float)(targets1Array[0].x + targets1Array[0].width)/mBgLayout.getWidth(),
+                            (float)(targets1Array[0].y + targets1Array[0].height)/mBgLayout.getHeight()
                     );
                     mActiveTrackMission = new ActiveTrackMission(rectF, ActiveTrackMode.TRACE);
 
@@ -504,6 +546,7 @@ public class ActiveTrackActivity extends FPVActivity implements SurfaceTextureLi
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
         super.onSurfaceTextureUpdated(surface);
         Bitmap bitmap = mVideoSurface.getBitmap();
-        picturehandle.new Picture_Match(bitmap,myHandler).begin();
+        picturehandle.new Picture_Detector1(bitmap,myHandler1).begin();
+        picturehandle.new Picture_Detector2(bitmap,myHandler2).begin();
     }
 }
