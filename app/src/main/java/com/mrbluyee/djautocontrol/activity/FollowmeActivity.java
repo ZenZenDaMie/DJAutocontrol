@@ -97,6 +97,7 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
     private Button locate, searh_site, gosite,stopmission;
 
     private double droneLocationLat = 121.40533301729, droneLocationLng = 31.322594332605;
+    private double droneStartLat,droneStartLng;
     private final Map<Integer, Marker> mMarkers = new ConcurrentHashMap<Integer, Marker>();
     private Marker droneMarker = null;
 
@@ -279,7 +280,7 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
                 new CommonCallbacks.CompletionCallbackWith<UserAccountState>() {
                     @Override
                     public void onSuccess(final UserAccountState userAccountState) {
-                        Log.e(TAG, "Login Success");
+                        Log.i(TAG, "Login Success");
                     }
                     @Override
                     public void onFailure(DJIError error) {
@@ -437,7 +438,9 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
             if (followMeMissionOperator.getCurrentState().toString().equals(FollowMeMissionState.READY_TO_EXECUTE.toString())) {
                 //ToDo: You need init or get the location of your moving object which will be followed by the aircraft.
                 if(movingObjectLocation != null) {
-                    followMeMissionOperator.startMission(FollowMeMission.getInstance().initUserData(droneLocationLat, droneLocationLng, altitude), new CommonCallbacks.CompletionCallback() {
+                    droneStartLat = droneLocationLat;
+                    droneStartLng = droneLocationLng;
+                    followMeMissionOperator.startMission(FollowMeMission.getInstance().initUserData(droneStartLat, droneStartLng, altitude), new CommonCallbacks.CompletionCallback() {
                         @Override
                         public void onResult(DJIError djiError) {
                             setResultToToast("Mission Start: " + (djiError == null ? "Successfully" : djiError.getDescription()));
@@ -449,21 +452,19 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
                             @Override
                             public void call(Long aLong) {
                                 if(movingObjectLocation != null) {
-                                    double now_latitude_different = (droneLocationLat - movingObjectLocation.getLatitude())/latitude_1cm;
-                                    double now_longitude_different = (droneLocationLng -movingObjectLocation.getLongitude())/longitude_1cm;
-                                    double now_latitude = droneLocationLat;
-                                    double now_longitude = droneLocationLng;
+                                    double now_latitude_different = (droneStartLat - movingObjectLocation.getLatitude())/latitude_1cm;
+                                    double now_longitude_different = (droneStartLng -movingObjectLocation.getLongitude())/longitude_1cm;
                                     if(now_latitude_different < -10){
-                                        now_latitude = droneLocationLat + latitude_1cm*10;
+                                        droneStartLat += latitude_1cm*10;
                                     }else if(now_latitude_different > 10){
-                                        now_latitude = droneLocationLat - latitude_1cm*10;
+                                        droneStartLat -= latitude_1cm*10;
                                     }
                                     if(now_longitude_different < -10){
-                                        now_longitude = droneLocationLng + longitude_1cm*10;
+                                        droneStartLng += longitude_1cm*10;
                                     }else if(now_longitude_different > 10){
-                                        now_longitude = droneLocationLng - longitude_1cm*10;
+                                        droneStartLng -= longitude_1cm*10;
                                     }
-                                    followMeMissionOperator.updateFollowingTarget(new LocationCoordinate2D(now_latitude,  now_longitude),
+                                    followMeMissionOperator.updateFollowingTarget(new LocationCoordinate2D(droneStartLat, droneStartLng),
                                             new CommonCallbacks.CompletionCallback() {
                                                 @Override
                                                 public void onResult(DJIError error) {
