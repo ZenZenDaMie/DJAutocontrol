@@ -38,6 +38,7 @@ public class PushDataActivity extends Activity {
     private boolean webpostflag = false;
     private MyHandler myHandler;
     private WebRequestApplication webrequest = new WebRequestApplication();
+    private String station_id = "112130";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,12 +48,12 @@ public class PushDataActivity extends Activity {
         IntentFilter filter = new IntentFilter();
         filter.addAction(DJSDKApplication.FLAG_CONNECTION_CHANGE);
         registerReceiver(mReceiver, filter);
+        myHandler = new MyHandler();
         DS = new DroneStatusInfo();
         DS.setDrone_id(this.getString(R.string.drone_id));
 
         initUI();
         initFlightController();
-        myHandler = new MyHandler();
     }
 
     class MyHandler extends Handler {
@@ -101,7 +102,7 @@ public class PushDataActivity extends Activity {
                 DS.setConnect_status(0);
             }
             updateUI();
-            webrequest.Get_chargesite_drone_info(myHandler);
+            webrequest.Get_chargesite_info(myHandler,station_id);
             if (webpostflag) {
                 postDroneData();
             }
@@ -156,7 +157,7 @@ public class PushDataActivity extends Activity {
                             DS.setConnect_status(0);
                         }
                         updateUI();
-                        webrequest.Get_chargesite_drone_info(myHandler);
+                        webrequest.Get_chargesite_info(myHandler,station_id);
                         if (webpostflag) {
                             postDroneData();
                         }
@@ -173,7 +174,7 @@ public class PushDataActivity extends Activity {
                             DS.setLatitude(djiFlightControllerCurrentState.getAircraftLocation().getLatitude());
                             DS.setLongitude(djiFlightControllerCurrentState.getAircraftLocation().getLongitude());
                             updateUI();
-                            webrequest.Get_chargesite_drone_info(myHandler);
+                            webrequest.Get_chargesite_info(myHandler,station_id);
                             if (webpostflag) {
                                 postDroneData();
                             }
@@ -186,6 +187,7 @@ public class PushDataActivity extends Activity {
         String postdata = "uavid="+
                 DS.getDrone_id()+
                 "&power="+
+                DS.getCharge()+
                 "&temporary="+
                 DS.getTemperature()+
                 "&linkstatus="+

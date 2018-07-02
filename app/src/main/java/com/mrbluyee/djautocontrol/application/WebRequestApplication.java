@@ -139,39 +139,6 @@ public class WebRequestApplication {
         }).start();
     }
 
-    public void Get_chargesite_drone_info(final Handler UIHandler){
-        new Thread(new Runnable() {
-            String  url = "http://139.196.138.204/tp5/public/station/getuav?uavid=saas&stationid=112130";
-            String result = null;
-            @Override
-            public void run() {
-                try {
-                    OkHttpClient client = new OkHttpClient();//创建OkHttpClient对象
-                    Request request = new Request.Builder()
-                            .url(url)//请求接口。如果需要传参拼接到接口后面。
-                            .build();//创建Request 对象
-                    Response response = null;
-                    response = client.newCall(request).execute();//得到Response 对象
-                    if (response.isSuccessful()) {
-                        Log.d("getdroneinfo","response.code()=="+response.code());
-                        result = response.body().string();
-                        //Log.d("getdroneinfo","response.body()=="+result);
-                        JSONObject object = new JSONObject(result);
-                        if(object.has("uavid")){
-                            String uavid = object.getString("uavid");
-                            Message msg = new Message();
-                            Bundle b = new Bundle();// 存放数据
-                            b.putString("uavid", uavid);
-                            msg.setData(b);
-                            UIHandler.sendMessage(msg);
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
 
     public void Post_drone_info(final String droneinfo) {
         new Thread(new Runnable() {
