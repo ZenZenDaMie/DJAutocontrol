@@ -81,7 +81,7 @@ public class RemoteControlApplication  extends Application {
     public void Up(int ms,int delayms){
         lock=true;
         if (throttle < 50) {
-            throttle = 2;
+            throttle = 0.5f;
         }
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -98,7 +98,7 @@ public class RemoteControlApplication  extends Application {
     public void Down(int ms,int delayms){
         lock=true;
         if (throttle >=0) {
-            throttle = -2;
+            throttle = -0.1f;
         }
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -157,7 +157,7 @@ public class RemoteControlApplication  extends Application {
     public void left_move(int ms,int delayms){
         lock=true;
         yaw = 0;
-        pitch = -2;
+        pitch = -0.1f;
         roll = 0;
         throttle = 0;
         Timer timer = new Timer();
@@ -178,7 +178,7 @@ public class RemoteControlApplication  extends Application {
     public void right_move(int ms,int delayms){
         lock=true;
         yaw = 0;
-        pitch = 2;
+        pitch = 0.1f;
         roll = 0;
         throttle = 0;
         Timer timer = new Timer();
@@ -200,7 +200,7 @@ public class RemoteControlApplication  extends Application {
         lock=true;
         yaw = 0;
         pitch = 0;
-        roll = 1;
+        roll = 0.1f;
         throttle = 0;
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -221,7 +221,7 @@ public class RemoteControlApplication  extends Application {
         lock=true;
         yaw = 0;
         pitch = 0;
-        roll = -1;
+        roll = -0.1f;
         throttle = 0;
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
