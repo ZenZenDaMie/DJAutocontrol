@@ -28,6 +28,13 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Rect;
 
 import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
+
+import dji.thirdparty.rx.Observable;
+import dji.thirdparty.rx.Subscription;
+import dji.thirdparty.rx.functions.Action1;
+import dji.thirdparty.rx.schedulers.Schedulers;
 
 public class SiteLandingActivity extends FPVActivity implements TextureView.SurfaceTextureListener {
     private static final String TAG = SiteLandingActivity.class.getName();
@@ -40,6 +47,8 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
     private ToggleButton mAutolandBtn;
     private MyHandler1 myHandler1;
     private MyHandler2 myHandler2;
+    private Timer timer = new Timer();
+    TimerTask autoLandTask = null;
     private TextView mPushTv;
     private boolean auto_land_flag = false;
     private float best_focus_x = 0.5187f;
@@ -61,6 +70,12 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
         initUI();
         myHandler1 = new MyHandler1();
         myHandler2 = new MyHandler2();
+        autoLandTask = new TimerTask() {
+            @Override
+            public void run() {
+                autoLand();
+            }
+        };
     }
 
 
@@ -154,6 +169,7 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -191,9 +207,12 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
                 if (isChecked) {
                     auto_land_flag = true;
                     remotecontrol.EnableVirtualStick();
+                    timer.scheduleAtFixedRate(autoLandTask,100,100);
                 } else {
                     auto_land_flag = false;
                     remotecontrol.DisableVirtualStick();
+                    timer.purge();
+                    timer.cancel();
                 }
             }
         });
@@ -276,31 +295,56 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
     }
 
     public void autoLand(){
-        if(auto_land_flag){
-            float x_different = targets1_percent_center_x  - best_focus_x;
-            float y_different = targets1_percent_center_y - best_focus_y;
-            boolean land_flag = true;
-            if(x_different > 0.1){ // 往右偏了
-                land_flag = false;
-                remotecontrol.right_move(10,2000);
-                Log.d(TAG, "left move");
-            }else if(x_different < -0.1){ //往左偏了
-                land_flag = false;
-                remotecontrol.left_move(10,2000);
-                Log.d(TAG, "right move");
+        if(auto_land_flag) {
+            if ((targets1_percent_center_x != 0) || (targets1_percent_center_y != 0)) {
+                float x_different = targets1_percent_center_x - best_focus_x;
+                float y_different = targets1_percent_center_y - best_focus_y;
+                targets1_percent_center_x = 0;
+                targets1_percent_center_y = 0;
+                boolean land_flag = true;
+                if (x_different > 0.1) { // 往右偏了
+                    land_flag = false;
+                    remotecontrol.right_move(10, 2000);
+                    Log.d(TAG, "left move");
+                } else if (x_different < -0.1) { //往左偏了
+                    land_flag = false;
+                    remotecontrol.left_move(10, 2000);
+                    Log.d(TAG, "right move");
+                }
+                if (y_different > 0.1) { //往下偏了
+                    land_flag = false;
+                    remotecontrol.back_move(10, 2000);
+                    Log.d(TAG, "ahead move");
+                } else if (y_different < -0.1) {  //往前偏了
+                    land_flag = false;
+                    remotecontrol.ahead_move(10, 2000);
+                    Log.d(TAG, "back move");
+                }
+                //if (land_flag) {
+                   // remotecontrol.Down(100, 2000);
+               // }
             }
-            if(y_different > 0.1){ //往下偏了
-                land_flag = false;
-                remotecontrol.back_move(10,2000);
-                Log.d(TAG, "ahead move");
-            }else if(y_different < -0.1){  //往前偏了
-                land_flag = false;
-                remotecontrol.ahead_move(10,2000);
-                Log.d(TAG, "back move");
+            if((targets2_percent_center_x!=0)||(targets2_percent_center_y!=0)) {
+                float x_different = targets2_percent_center_x - best_focus_x;
+                float y_different = targets2_percent_center_y - best_focus_y;
+                targets2_percent_center_x = 0;
+                targets2_percent_center_y = 0;
+                //boolean land_flag = true;
             }
-           if(land_flag){
-               remotecontrol.Down(10,2000);
-          }
+            if(angle_du!=0){
+                if((-92<angle_du)&&(angle_du<-74)){
+
+                }
+                else {
+                    if(angle_du>0){
+
+                    }
+                    else {
+
+                    }
+                }
+            }
         }
     }
+
 }

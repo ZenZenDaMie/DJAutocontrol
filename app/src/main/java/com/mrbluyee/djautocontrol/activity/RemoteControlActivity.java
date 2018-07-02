@@ -297,7 +297,7 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
             case R.id.btn_up:{
                 Toast.makeText(this, "start up", Toast.LENGTH_LONG).show();
                 if(remotecontrol.lock==false) {
-                    remotecontrol.Up(1000, 10000);
+                    remotecontrol.Up(1000, 2000);
                 }
                 //roll=(float)(roll+1);
                 break;
@@ -313,7 +313,7 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
             }
             case R.id.btn_left_turn:{
                 if(remotecontrol.lock==false){
-                    remotecontrol.turn_left(1000,10000);
+                    remotecontrol.turn_left(1000,2000);
                 }
                 break;
             }
