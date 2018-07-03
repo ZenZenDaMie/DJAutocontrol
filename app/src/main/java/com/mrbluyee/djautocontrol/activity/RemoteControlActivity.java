@@ -2,6 +2,7 @@ package com.mrbluyee.djautocontrol.activity;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -40,6 +41,7 @@ import com.mrbluyee.djautocontrol.application.RemoteControlApplication;
  */
 
 public class RemoteControlActivity extends MainActivity implements View.OnClickListener{
+    private static final String TAG = RemoteControlActivity.class.getName();
     private boolean yawControlModeFlag = true;
 
     private RemoteControlApplication remotecontrol= new RemoteControlApplication (this);
@@ -296,46 +298,43 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
             }
             case R.id.btn_up:{
                 Toast.makeText(this, "start up", Toast.LENGTH_LONG).show();
-                if(remotecontrol.lock==false) {
-                    remotecontrol.Up(1000, 2000);
-                }
+                remotecontrol.Up(1000,2000);
                 //roll=(float)(roll+1);
                 break;
             }
             case R.id.btn_down:{
                 Toast.makeText(this, "start down", Toast.LENGTH_LONG).show();
                 remotecontrol.Down(1000,2000);
-                /*if (throttle > 1) {
-                    throttle = throttle - 1;
-                }
-                */
                 break;
             }
             case R.id.btn_left_turn:{
-                if(remotecontrol.lock==false){
-                    remotecontrol.turn_left(1000,2000);
-                }
+                remotecontrol.turn_left(1000,2000);
+                Log.d(TAG, "turn left");
                 break;
             }
             case R.id.btn_right_turn:{
                 remotecontrol.turn_right(1000,2000);
+                Log.d(TAG, "turn right");
                 break;
             }
             case R.id.btn_ahead_move:{
                 remotecontrol.ahead_move(1000,2000);
-                //remotecontrol.
+                Log.d(TAG, "ahead move");
                 break;
             }
             case R.id.btn_back_move: {
                 remotecontrol.back_move(1000,2000);
+                Log.d(TAG, "back move");
                 break;
             }
             case R.id.btn_left_move:{
                 remotecontrol.left_move(1000,2000);
+                Log.d(TAG, "left move");
                 break;
             }
             case R.id.btn_right_move:{
                 remotecontrol.right_move(1000,2000);
+                Log.d(TAG, "right move");
                 break;
             }
         }
