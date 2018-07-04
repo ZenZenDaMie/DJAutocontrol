@@ -190,6 +190,8 @@ public class PushDataActivity extends Activity {
                 DS.getCharge()+
                 "&temporary="+
                 DS.getTemperature()+
+                "&current="+
+                DS.getCurrent()+
                 "&linkstatus="+
                 DS.getConnect_status()+
                 "&stationid=112130";
