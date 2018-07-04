@@ -32,12 +32,12 @@ public class RemoteControlApplication  extends Application {
     public Timer sendVirtualStickDataTimer;
     public SendVirtualStickDataTask sendVirtualStickDataTask;
 
-    public float pitch;//俯仰角(前后转动？？？)
-    public float roll;//滚动(左右转动？？？)
-    public float yaw;//Yaw轴，偏航(角速度)
-    public float throttle;//(好像是风速？？)
+    public float Pitch;//俯仰角(前后转动？？？)
+    public float Roll;//滚动(左右转动？？？)
+    public float Yaw;//Yaw轴，偏航(角速度)
+    public float Throttle;//(好像是风速？？)
+    public boolean move_finished = true;
     public FlightControllerKey isSimulatorActived;
-    public boolean lock=false;
     private Context context;
     public RemoteControlApplication (Context context){
         this.context = context;
@@ -78,165 +78,122 @@ public class RemoteControlApplication  extends Application {
                     }
                 });
     }
-    public void Up(int ms,int delayms){
-        lock=true;
-        if (throttle < 50) {
-            throttle = 0.5f;
+    public void Up(float throttle,int ms){
+        move_finished = false;
+        if (Throttle < 50) {
+            Throttle = throttle;
         }
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
-                throttle=0;
+                Throttle=0;
+                move_finished = true;
             }
         }, ms);
-        timer.schedule(new TimerTask() {
-            public void run() {
-                lock=false;
-            }
-        }, delayms);
     }
-    public void Down(int ms,int delayms){
-        lock=true;
-        if (throttle >=0) {
-            throttle = -0.08f;
+    public void Down(float throttle,int ms){
+        move_finished = false;
+        if (Throttle >=0) {
+            Throttle = - throttle;
         }
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
-                throttle=0;
+                Throttle=0;
+                move_finished = true;
             }
         }, ms);
-        timer.schedule(new TimerTask() {
-            public void run() {
-                lock=false;
-            }
-        }, delayms);
     }
-    public void turn_left(int ms,int delayms){
-        lock=true;
-        yaw = -10f;
-        pitch = 0;
-        roll = 0;
-        throttle = 0;
+    public void quickDown(float throttle,int ms){
+        move_finished = false;
+        if (Throttle >=0) {
+            Throttle = - throttle;
+        }
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
-                yaw = 0;
-                pitch = 0;
-                roll = 0;
-                throttle = 0;
+                Throttle=0;
+                move_finished = true;
             }
         }, ms);
-        timer.schedule(new TimerTask() {
-            public void run() {
-                lock=false;
-            }
-        }, delayms);
     }
-    public void turn_right(int ms,int delayms){
-        lock=true;
-        yaw = 10f;
-        pitch = 0;
-        roll = 0;
-        throttle = 0;
+    public void turn_left(int ms){
+        move_finished = false;
+        Yaw = -10f;
+        Pitch = 0;
+        Roll = 0;
+        Throttle = 0;
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
-                yaw = 0;
-                pitch = 0;
-                roll = 0;
-                throttle = 0;
+                Yaw = 0;
+                Pitch = 0;
+                Roll = 0;
+                Throttle = 0;
+                move_finished = true;
             }
         }, ms);
-        timer.schedule(new TimerTask() {
-            public void run() {
-                lock=false;
-            }
-        }, delayms);
     }
-    public void left_move(int ms,int delayms){
-        lock=true;
-        yaw = 0;
-        pitch = -0.1f;
-        roll = 0;
-        throttle = 0;
+    public void turn_right(int ms){
+        move_finished = false;
+        Yaw = 10f;
+        Pitch = 0;
+        Roll = 0;
+        Throttle = 0;
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
-                yaw = 0;
-                pitch = 0;
-                roll = 0;
-                throttle = 0;
+                Yaw = 0;
+                Pitch = 0;
+                Roll = 0;
+                Throttle = 0;
+                move_finished = true;
             }
         }, ms);
-        timer.schedule(new TimerTask() {
-            public void run() {
-                lock=false;
-            }
-        }, delayms);
     }
-    public void right_move(int ms,int delayms){
-        lock=true;
-        yaw = 0;
-        pitch = 0.1f;
-        roll = 0;
-        throttle = 0;
+    public void left_move(float pitch,int ms){
+        move_finished = false;
+        Pitch = - pitch;
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
-                yaw = 0;
-                pitch = 0;
-                roll = 0;
-                throttle = 0;
+                Pitch = 0;
+                move_finished = true;
             }
         }, ms);
-        timer.schedule(new TimerTask() {
-            public void run() {
-                lock=false;
-            }
-        }, delayms);
     }
-    public void ahead_move(int ms,int delayms){
-        lock=true;
-        yaw = 0;
-        pitch = 0;
-        roll = 0.1f;
-        throttle = 0;
+    public void right_move(float pitch,int ms){
+        move_finished = false;
+        Pitch = pitch;
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
-                yaw = 0;
-                pitch = 0;
-                roll = 0;
-                throttle = 0;
+                Pitch = 0;
+                move_finished = true;
             }
         }, ms);
-        timer.schedule(new TimerTask() {
-            public void run() {
-                lock=false;
-            }
-        }, delayms);
     }
-    public void back_move(int ms,int delayms){
-        lock=true;
-        yaw = 0;
-        pitch = 0;
-        roll = -0.1f;
-        throttle = 0;
+    public void ahead_move(float roll,int ms){
+        move_finished = false;
+        Roll = roll;
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
-                yaw = 0;
-                pitch = 0;
-                roll = 0;
-                throttle = 0;
+                Roll = 0;
+                move_finished = true;
             }
         }, ms);
+    }
+    public void back_move(float roll,int ms){
+        move_finished = false;
+        Roll = -roll;
+        Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
-                lock=false;
+                Roll = 0;
+                move_finished = true;
             }
-        }, delayms);
+        }, ms);
     }
     public class SendVirtualStickDataTask extends TimerTask {
 
@@ -247,10 +204,10 @@ public class RemoteControlApplication  extends Application {
             if (ModuleVerificationUtil.isFlightControllerAvailable()) {
                 DJSDKApplication.getAircraftInstance()
                         .getFlightController()
-                        .sendVirtualStickFlightControlData(new FlightControlData(pitch,
-                                        roll,
-                                        yaw,
-                                        throttle),
+                        .sendVirtualStickFlightControlData(new FlightControlData(Pitch,
+                                        Roll,
+                                        Yaw,
+                                        Throttle),
                                 new CommonCallbacks.CompletionCallback() {
                                     @Override
                                     public void onResult(DJIError djiError) {

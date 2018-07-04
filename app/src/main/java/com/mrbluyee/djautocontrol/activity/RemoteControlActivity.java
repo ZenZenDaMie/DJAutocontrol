@@ -176,13 +176,13 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
 
                 if (horizontalCoordinateFlag) {
                     if (rollPitchControlModeFlag) {
-                        remotecontrol.pitch = (float) (pitchJoyControlMaxSpeed * pX);
+                        remotecontrol.Pitch = (float) (pitchJoyControlMaxSpeed * pX);
 
-                        remotecontrol.roll = (float) (rollJoyControlMaxSpeed * pY);
+                        remotecontrol.Roll = (float) (rollJoyControlMaxSpeed * pY);
                     } else {
-                        remotecontrol.pitch = -(float) (pitchJoyControlMaxSpeed * pY);
+                        remotecontrol.Pitch = -(float) (pitchJoyControlMaxSpeed * pY);
 
-                        remotecontrol.roll = (float) (rollJoyControlMaxSpeed * pX);
+                        remotecontrol.Roll = (float) (rollJoyControlMaxSpeed * pX);
                     }
                 }
 
@@ -209,8 +209,8 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
                 float verticalJoyControlMaxSpeed = 2;
                 float yawJoyControlMaxSpeed = 3;
 
-                remotecontrol.yaw = yawJoyControlMaxSpeed * pX;
-                remotecontrol.throttle = verticalJoyControlMaxSpeed * pY;
+                remotecontrol.Yaw = yawJoyControlMaxSpeed * pX;
+                remotecontrol.Throttle = verticalJoyControlMaxSpeed * pY;
 
                 if (null == remotecontrol.sendVirtualStickDataTimer) {
                     sendVirtualStickDataTask = remotecontrol.new SendVirtualStickDataTask();
@@ -298,42 +298,42 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
             }
             case R.id.btn_up:{
                 Toast.makeText(this, "start up", Toast.LENGTH_LONG).show();
-                remotecontrol.Up(1000,2000);
+                remotecontrol.Up(0.5f,1000);
                 //roll=(float)(roll+1);
                 break;
             }
             case R.id.btn_down:{
                 Toast.makeText(this, "start down", Toast.LENGTH_LONG).show();
-                remotecontrol.Down(1000,2000);
+                remotecontrol.Down(0.5f,1000);
                 break;
             }
             case R.id.btn_left_turn:{
-                remotecontrol.turn_left(1000,2000);
+                remotecontrol.turn_left(1000);
                 Log.d(TAG, "turn left");
                 break;
             }
             case R.id.btn_right_turn:{
-                remotecontrol.turn_right(1000,2000);
+                remotecontrol.turn_right(1000);
                 Log.d(TAG, "turn right");
                 break;
             }
             case R.id.btn_ahead_move:{
-                remotecontrol.ahead_move(1000,2000);
+                remotecontrol.ahead_move(0.5f,1000);
                 Log.d(TAG, "ahead move");
                 break;
             }
             case R.id.btn_back_move: {
-                remotecontrol.back_move(1000,2000);
+                remotecontrol.back_move(0.5f,1000);
                 Log.d(TAG, "back move");
                 break;
             }
             case R.id.btn_left_move:{
-                remotecontrol.left_move(1000,2000);
+                remotecontrol.left_move(0.5f,1000);
                 Log.d(TAG, "left move");
                 break;
             }
             case R.id.btn_right_move:{
-                remotecontrol.right_move(1000,2000);
+                remotecontrol.right_move(0.5f,1000);
                 Log.d(TAG, "right move");
                 break;
             }

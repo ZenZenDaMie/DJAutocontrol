@@ -51,10 +51,9 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
     private MyHandler1 myHandler1;
     private MyHandler2 myHandler2;
     private Timer mtimer = null;
-    TimerTask autoLandTask = null;
+    private TimerTask autoLandTask = null;
     private TextView mPushTv;
 
-    private boolean auto_land_flag = false;
     private float best_focus_x = 0.5f; //最佳的绿框位置
     private float best_focus_y = 0.5f;
     private float best_inside_focus_x = 0.5f; //最佳的圆框位置
@@ -68,7 +67,7 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
     private  boolean targets1_land_flag = true;
     private  boolean targets1_detected = false;
     private int targets1_notdetected_num = 0;
-
+    private  boolean target1_update = false;
 
     private float targets2_center_x = 0; //圆框中心像素位置
     private float targets2_center_y = 0;
@@ -77,6 +76,7 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
     private  boolean targets2_land_flag = true;
     private  boolean targets2_detected = false;
     private int targets2_notdetected_num = 0;
+    private  boolean target2_update = false;
     private double angle_du = 0; //圆框相对于绿框的角度
 
     private float present_location_x = 0; //无人机当前预测位置
@@ -87,6 +87,7 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
     private int last_move_side = 0; //上一次的移动方向，0为无动作，1为向左，2为向右
     private boolean predict_mode = false;
     private int predict_time = 0;//连续预测执行的次数，超过设定次即数认为无人机镜头已偏离目标
+    private int predict_round = 0;
 
 
     @Override
@@ -124,6 +125,7 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
                         mTrackingImage1.requestLayout();
                         mTrackingImage1.setVisibility(View.VISIBLE);
                         showinfo();
+                        target1_update = true;
                     }
                 });
             }else {
@@ -163,6 +165,7 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
                         mTrackingImage2.requestLayout();
                         mTrackingImage2.setVisibility(View.VISIBLE);
                         showinfo();
+                        target2_update = true;
                     }
                 });
             }else {
@@ -189,7 +192,7 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
             };
         }
         if((mtimer != null)&&(autoLandTask != null)){
-            mtimer.scheduleAtFixedRate(autoLandTask,500,500);
+            mtimer.scheduleAtFixedRate(autoLandTask,1000,1000);
         }
     }
 
@@ -252,12 +255,10 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    auto_land_flag = true;
                     remotecontrol.EnableVirtualStick();
                     startTimer();
 
                 } else {
-                    auto_land_flag = false;
                     remotecontrol.DisableVirtualStick();
                     stopTimer();
                 }
@@ -337,14 +338,15 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
                 StringHandleUtil.addLineToSB(sb, "angle", angle_du);
             }
         }
-        StringHandleUtil.addLineToSB(sb, "Auto_enable", auto_land_flag);
         setResultToText(sb.toString());
     }
 
     public void Target1Handle(){
-        if ((targets1_percent_center_x != 0) || (targets1_percent_center_y != 0)) { //如果目标识别有更新
+        if (target1_update) { //如果目标识别有更新
+            target1_update = false;
             predict_mode = false;
             predict_time = 0;//启动预测次数清零
+            predict_round = 0;
             targets1_notdetected_num = 0;
             targets1_detected = true;
             flight_offset_x = targets1_percent_center_x - present_location_x;
@@ -353,68 +355,121 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
             present_location_y = targets1_percent_center_y;
             float x_different = present_location_x - best_focus_x;
             float y_different = present_location_y - best_focus_y;
-            targets1_percent_center_x = 0;
-            targets1_percent_center_y = 0;
             targets1_land_flag = true;
             if (x_different > 0.1) { // 往右偏了
-                remotecontrol.right_move(1000, 500);
-                present_location_x -= 0.1;
-                last_move_side = 2;//记录移动方向
-                targets1_land_flag = false;
-                Log.d(TAG, "Target1 left move");
+                if(remotecontrol.move_finished) {
+                    remotecontrol.right_move(0.08f, 1000);
+                    present_location_x -= 0.1;
+                    last_move_side = 2;//记录移动方向
+                    targets1_land_flag = false;
+                    Log.d(TAG, "Target1 left move");
+                }
             } else if (x_different < -0.1) { //往左偏了
-                remotecontrol.left_move(1000, 500);
-                present_location_x += 0.1;
-                last_move_side = 1;
-                targets1_land_flag = false;
-                Log.d(TAG, "Target1 right move");
+                if(remotecontrol.move_finished) {
+                    remotecontrol.left_move(0.16f, 2000);
+                    present_location_x += 0.1;
+                    last_move_side = 1;
+                    targets1_land_flag = false;
+                    Log.d(TAG, "Target1 right move");
+                }
             }else {
                 last_move_side = 0;
             }
             if (y_different > 0.1) { //往下偏了
-                remotecontrol.back_move(1000, 500);
-                present_location_y -= 0.1;
-                last_move_front = 2;
-                targets1_land_flag = false;
-                Log.d(TAG, "Target1 ahead move");
+                if(remotecontrol.move_finished) {
+                    remotecontrol.back_move(0.08f, 1000);
+                    present_location_y -= 0.1;
+                    last_move_front = 2;
+                    targets1_land_flag = false;
+                    Log.d(TAG, "Target1 ahead move");
+                }
             } else if (y_different < -0.1) {  //往前偏了
-                remotecontrol.ahead_move(1000, 500);
-                present_location_y += 0.1;
-                last_move_front = 1;
-                targets1_land_flag = false;
-                Log.d(TAG, "Target1 back move");
+                if(remotecontrol.move_finished) {
+                    remotecontrol.ahead_move(0.10f, 1500);
+                    present_location_y += 0.1;
+                    last_move_front = 1;
+                    targets1_land_flag = false;
+                    Log.d(TAG, "Target1 back move");
+                }
             }else {
                 last_move_front = 0;
             }
-            remotecontrol.Down(4000, 500);
+            if(targets1_land_flag) {
+                remotecontrol.quickDown(0.5f,500);
+            }else {
+                remotecontrol.Down(0.08f,300);
+            }
         }else {
-            targets1_notdetected_num ++;
-            if(targets1_notdetected_num > 20){
-                targets1_notdetected_num = 0;
-                targets1_detected = false;
+            if ((targets1_percent_center_x != 0) || (targets1_percent_center_y != 0)) {
+                targets1_notdetected_num++;
+                if (targets1_notdetected_num > 5) {
+                    targets1_detected = false;
+                } /*else {
+                    float x_different = targets1_percent_center_x - best_focus_x;
+                    float y_different = targets1_percent_center_y - best_focus_y;
+                    targets1_land_flag = true;
+                    if (x_different > 0.1) { // 往右偏了
+                        if(remotecontrol.move_finished) {
+                            remotecontrol.right_move(0.08f, 1000);
+                            present_location_x -= 0.1;
+                            last_move_side = 2;//记录移动方向
+                            targets1_land_flag = false;
+                            Log.d(TAG, "Target1 left move");
+                        }
+                    } else if (x_different < -0.1) { //往左偏了
+                        if(remotecontrol.move_finished) {
+                            remotecontrol.left_move(0.16f, 1500);
+                            present_location_x += 0.1;
+                            last_move_side = 1;
+                            targets1_land_flag = false;
+                            Log.d(TAG, "Target1 right move");
+                        }
+                    } else {
+                        last_move_side = 0;
+                    }
+                    if (y_different > 0.1) { //往下偏了
+                        if(remotecontrol.move_finished) {
+                            remotecontrol.back_move(0.08f, 1000);
+                            present_location_y -= 0.1;
+                            last_move_front = 2;
+                            targets1_land_flag = false;
+                            Log.d(TAG, "Target1 ahead move");
+                        }
+                    } else if (y_different < -0.1) {  //往前偏了
+                        if(remotecontrol.move_finished) {
+                            remotecontrol.ahead_move(0.16f, 1500);
+                            present_location_y += 0.1;
+                            last_move_front = 1;
+                            targets1_land_flag = false;
+                            Log.d(TAG, "Target1 back move");
+                        }
+                    } else {
+                        last_move_front = 0;
+                    }
+                }*/
             }
         }
     }
 
     public void Target2Handle(){
-        if((targets2_percent_center_x!=0)||(targets2_percent_center_y!=0)) { //识别到圆准心目标
+        if(target2_update) { //识别到圆准心目标
+            target2_update = false;
             predict_mode = false;
             predict_time = 0;//启动预测次数清零
+            predict_round = 0;
             targets2_notdetected_num = 0;
             targets2_detected = true;
             float x_different = targets2_percent_center_x - best_inside_focus_x;
             float y_different = targets2_percent_center_y - best_inside_focus_y;
-            targets2_percent_center_x = 0;
-            targets2_percent_center_y = 0;
             targets2_land_flag = true;
-            if (x_different > 0.1) { // 往右偏了
-                remotecontrol.right_move(1000, 500);
+            if (x_different > 0.15) { // 往右偏了
+                remotecontrol.right_move(0.08f,500);
                 present_location_x -= 0.1;
                 last_move_side = 2;//记录移动方向
                 targets2_land_flag  = false;
                 Log.d(TAG, "Target2 left move");
-            } else if (x_different < -0.1) { //往左偏了
-                remotecontrol.left_move(1000, 500);
+            } else if (x_different < -0.15) { //往左偏了
+                remotecontrol.left_move(0.16f,500);
                 present_location_x += 0.1;
                 last_move_side = 1;
                 targets2_land_flag  = false;
@@ -422,14 +477,14 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
             } else {
                 last_move_side = 0;
             }
-            if (y_different > 0.1) { //往下偏了
-                remotecontrol.back_move(1000, 500);
+            if (y_different > 0.15) { //往下偏了
+                remotecontrol.back_move(0.08f,500);
                 present_location_y -= 0.1;
                 last_move_front = 2;
                 targets2_land_flag  = false;
                 Log.d(TAG, "Target2 ahead move");
-            } else if (y_different < -0.1) {  //往前偏了
-                remotecontrol.ahead_move(1000, 500);
+            } else if (y_different < -0.15) {  //往前偏了
+                remotecontrol.ahead_move(0.10f,500);
                 present_location_y += 0.1;
                 last_move_front = 1;
                 targets2_land_flag  = false;
@@ -437,96 +492,54 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
             } else {
                 last_move_front = 0;
             }
-            remotecontrol.Down(2000, 500);
-            if (targets2_land_flag ) {
-                DJSDKApplication.getAircraftInstance().getFlightController().
-                        startLanding(new CommonCallbacks.CompletionCallback() {
-                            @Override
-                            public void onResult(DJIError djiError) {
-                            }
-                        });
-                auto_land_flag = false;
-                remotecontrol.DisableVirtualStick();
-                stopTimer();
+            if(targets2_land_flag) {
+                remotecontrol.Down(0.08f,500);
+                if (targets2_land_flag) {
+                    DJSDKApplication.getAircraftInstance().getFlightController().
+                            startLanding(new CommonCallbacks.CompletionCallback() {
+                                @Override
+                                public void onResult(DJIError djiError) {
+                                }
+                            });
+                }
             }
         }else {
-            targets2_notdetected_num++;
-            if (targets2_notdetected_num > 20) {
-                targets2_notdetected_num = 0;
-                targets2_detected = false;
+            if ((targets2_percent_center_x != 0) || (targets2_percent_center_y != 0)) {
+                targets2_notdetected_num++;
+                if (targets2_notdetected_num > 5) {
+                    targets2_detected = false;
+                }
             }
         }
     }
 
-    public void  predictHandle(){ //当检测不到图像时进入预测模式，最多预测20次，否则误差很大
+    public void  predictHandle(){ //当检测不到图像时进入预测模式
         if(predict_mode){
-            if(predict_time < 20) {
-                present_location_x += flight_offset_x; //首先加上预估误差
-                present_location_y += flight_offset_y;
-                float x_different = present_location_x - best_focus_x;
-                float y_different = present_location_y - best_focus_y;
-                boolean land_flag = true;
-                if (x_different > 0.1) { // 往右偏了
-                    land_flag = false;
-                    remotecontrol.right_move(100, 1000);
-                    present_location_x -= 0.05;
-                    last_move_side = 2;//记录移动方向
-                    Log.d(TAG, "predict left move");
-                } else if (x_different < -0.1) { //往左偏了
-                    land_flag = false;
-                    remotecontrol.left_move(100, 1000);
-                    present_location_x += 0.05;
-                    last_move_side = 1;
-                    Log.d(TAG, "predict right move");
-                }else {
-                    last_move_side = 0;
-                }
-                if (y_different > 0.1) { //往下偏了
-                    land_flag = false;
-                    remotecontrol.back_move(100, 1000);
-                    present_location_y -= 0.05;
-                    last_move_front = 2;
-                    Log.d(TAG, "predict ahead move");
-                } else if (y_different < -0.1) {  //往前偏了
-                    land_flag = false;
-                    remotecontrol.ahead_move(100, 1000);
-                    present_location_y += 0.05;
-                    last_move_front = 1;
-                    Log.d(TAG, "predict back move");
-                }else {
-                    last_move_front = 0;
-                }
-                if (land_flag) {
-                    remotecontrol.Down(2000, 1000);
-                }
-            } else { //predict_time 超过次数，认为镜头已经飞出目标
-                boolean previous_move = false;
-                if(last_move_front == 1){ //对照之前的动作，反方向移动
-                    remotecontrol.back_move(1000, 1000);
-                    previous_move = true;
-                }else if(last_move_front == 2){
-                    remotecontrol.ahead_move(1000, 1000);
-                    previous_move = true;
-                }
-                if(last_move_side == 1){
-                    remotecontrol.right_move(1000, 1000);
-                    previous_move = true;
-                }else if(last_move_side == 2){
-                    remotecontrol.left_move(1000, 1000);
-                    previous_move = true;
-                }
-                if(previous_move==false){ //先前没有动作，则按偏移的反方向移动
-                    if(flight_offset_x<0){//向左偏了
-                        remotecontrol.right_move(200, 1000);
-                    }else {
-                        remotecontrol.left_move(200, 1000);
+            switch (predict_round % 4) {
+                case 0:
+                    if(remotecontrol.move_finished){
+                        remotecontrol.ahead_move(0.16f,1500*(predict_round/4 + 1));
+                        predict_round ++;
                     }
-                    if(flight_offset_y<0){//向前偏了
-                        remotecontrol.back_move(200, 1000);
-                    }else {
-                        remotecontrol.ahead_move(200, 1000);
+                    break;
+                case 1:
+                    if(remotecontrol.move_finished){
+                        remotecontrol.right_move(0.08f,500*(predict_round/4 + 1));
+                        predict_round ++;
                     }
-                }
+                    break;
+                case 2:
+                    if(remotecontrol.move_finished){
+                        remotecontrol.back_move(0.08f,500*(predict_round/4 + 1));
+                        predict_round ++;
+                    }
+                    break;
+                case 3:
+                    if(remotecontrol.move_finished){
+                        remotecontrol.left_move(0.16f,1500*(predict_round/4 + 1));
+                        predict_round ++;
+                    }
+                    break;
             }
         }
     }
@@ -538,16 +551,12 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
             }
             else {
                 if(angle_du>0){
-                    if(remotecontrol.lock == false) {
-                        remotecontrol.turn_left(1000, 1000);
-                        Log.d(TAG, "turn left");
-                    }
+                    remotecontrol.turn_left(100);
+                    Log.d(TAG, "turn left");
                 }
                 else {
-                    if(remotecontrol.lock == false) {
-                        remotecontrol.turn_right(1000, 1000);
-                        Log.d(TAG, "turn right");
-                    }
+                    remotecontrol.turn_right(100);
+                    Log.d(TAG, "turn right");
                 }
             }
             angle_du = 0;
@@ -555,20 +564,18 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
     }
 
     public void autoLand(){
-        if(auto_land_flag) { //开启自动降落功能
-            if((targets1_detected == false)&&(targets2_detected == false)) { //两个目标都没检测到
-                predict_time++;
-            }
-            if(targets2_detected == false) { //检测到第二目标后，第一目标不响应
-                Target1Handle();
-            }
-            Target2Handle();
-            if(predict_time > 10){  //开启预判模式
-                predict_mode = true;
-            }
-            //predictHandle();
-            //angleHandle();
+        Log.d(TAG, "auto land start");
+        if((targets1_detected == false)&&(targets2_detected == false)) { //两个目标都没检测到
+            predict_time++;
         }
+       // if(targets2_detected == false) { //检测到第二目标后，第一目标不响应
+            Target1Handle();
+        //}
+        Target2Handle();
+        if(predict_time > 5){  //开启预判模式
+            predict_mode = true;
+        }
+        predictHandle();
+        //angleHandle();
     }
-
 }
