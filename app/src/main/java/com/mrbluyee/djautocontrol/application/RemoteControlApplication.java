@@ -98,7 +98,7 @@ public class RemoteControlApplication  extends Application {
     public void Down(int ms,int delayms){
         lock=true;
         if (throttle >=0) {
-            throttle = -0.1f;
+            throttle = -0.08f;
         }
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
