@@ -57,7 +57,7 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
     private float best_focus_x = 0.5f; //最佳的绿框位置
     private float best_focus_y = 0.5f;
     private float best_inside_focus_x = 0.5f; //最佳的圆框位置
-    private float best_inside_focus_y = 0.5f;
+    private float best_inside_focus_y = 0.3f;
 
     private float targets1_center_x = 0; //绿框中心像素位置
     private float targets1_center_y = 0;
@@ -88,6 +88,7 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
     private boolean predict_mode = false;
     private int predict_time = 0;//连续预测执行的次数，超过设定次即数认为无人机镜头已偏离目标
     private int predict_round = 0;
+    private int targets2_detected_times = 0;
 
 
     @Override
@@ -158,6 +159,7 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
                SiteLandingActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        targets2_detected_times ++ ;
                         mTrackingImage2.setX(targets2Array[0].x);
                         mTrackingImage2.setY(targets2Array[0].y);
                         mTrackingImage2.getLayoutParams().width = targets2Array[0].width;
@@ -377,7 +379,7 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
             }
             if (y_different > 0.1) { //往下偏了
                 if(remotecontrol.move_finished) {
-                    remotecontrol.back_move(0.15f, 500);
+                    remotecontrol.back_move(0.15f, 1000);
                     present_location_y -= 0.1;
                     last_move_front = 2;
                     targets1_land_flag = false;
@@ -385,7 +387,7 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
                 }
             } else if (y_different < -0.1) {  //往前偏了
                 if(remotecontrol.move_finished) {
-                    remotecontrol.ahead_move(0.18f, 1200);
+                    remotecontrol.ahead_move(0.15f, 1000);
                     present_location_y += 0.1;
                     last_move_front = 1;
                     targets1_land_flag = false;
@@ -463,13 +465,13 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
             float y_different = targets2_percent_center_y - best_inside_focus_y;
             targets2_land_flag = true;
             if (x_different > 0.1) { // 往右偏了
-                remotecontrol.right_move(0.2f,700);
+                remotecontrol.right_move(0.14f,500);
                 present_location_x -= 0.1;
                 last_move_side = 2;//记录移动方向
                 targets2_land_flag  = false;
                 Log.d(TAG, "Target2 left move");
             } else if (x_different < -0.1) { //往左偏了
-                remotecontrol.left_move(0.10f,500);
+                remotecontrol.left_move(0.14f,500);
                 present_location_x += 0.1;
                 last_move_side = 1;
                 targets2_land_flag  = false;
@@ -478,13 +480,13 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
                 last_move_side = 0;
             }
             if (y_different > 0.1) { //往下偏了
-                remotecontrol.back_move(0.08f,500);
+                remotecontrol.back_move(0.05f,500);
                 present_location_y -= 0.1;
                 last_move_front = 2;
                 targets2_land_flag  = false;
                 Log.d(TAG, "Target2 ahead move");
             } else if (y_different < -0.1) {  //往前偏了
-                remotecontrol.ahead_move(0.16f,700);
+                remotecontrol.ahead_move(0.14f,500);
                 present_location_y += 0.1;
                 last_move_front = 1;
                 targets2_land_flag  = false;
@@ -532,13 +534,13 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
                     break;
                 case 2:
                     if(remotecontrol.move_finished){
-                        remotecontrol.back_move(0.15f,1000*(predict_round/4 + 1));
+                        remotecontrol.back_move(0.2f,1500*(predict_round/4 + 1));
                         predict_round ++;
                     }
                     break;
                 case 3:
                     if(remotecontrol.move_finished){
-                        remotecontrol.left_move(0.25f,1000*(predict_round/4 + 1));
+                        remotecontrol.left_move(0.3f,1500*(predict_round/4 + 1));
                         predict_round ++;
                     }
                     break;
@@ -570,11 +572,12 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
         if((targets1_detected == false)&&(targets2_detected == false)) { //两个目标都没检测到
             predict_time++;
         }
-       // if(targets2_detected == false) { //检测到第二目标后，第一目标不响应
+       if(targets2_detected_times < 3) { //检测到第二目标后，第一目标不响应
             Target1Handle();
-        //}
+        }
         Target2Handle();
         if(predict_time > 5){  //开启预判模式
+            targets2_detected_times = 0;
             predict_mode = true;
         }
         predictHandle();
