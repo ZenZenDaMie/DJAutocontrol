@@ -155,7 +155,6 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
     }
 
     private void initUI() {
-
         locate = (Button) findViewById(R.id.locate);
         searh_site = (Button) findViewById(R.id.followme_search);
         gosite = (Button) findViewById(R.id.followme_gosite);
@@ -215,7 +214,7 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
             super.handleMessage(msg);
             // 此处可以更新UI
             Bundle b = msg.getData();
-            SparseArray<ChargeStationInfo> stationInfos_temp = webrequest.chargeStationInfoHandler(b);
+            SparseArray<ChargeStationInfo> stationInfos_temp = webrequest.chargeStationgpsInfoHandler(b);
             for(int i = 0;i<stationInfos_temp.size();i++){
                 int station_id = stationInfos_temp.keyAt(i);
                 ChargeStationInfo updatetationInfo = stationInfos_temp.valueAt(i);

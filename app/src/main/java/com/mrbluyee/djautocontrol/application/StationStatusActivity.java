@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.mrbluyee.djautocontrol.R;
 
+import com.mrbluyee.djautocontrol.utils.ChargeStationInfo;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnLoadmoreListener;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
@@ -45,14 +46,16 @@ public class StationStatusActivity extends AppCompatActivity {
     public TextView text3;
     public TextView text4;
     public TextView textid;
+    public TextView textcontrol;
     public TextView textlon;
     public TextView textlat;
     private WebRequestApplication webrequest = new WebRequestApplication();
-
     public MyHandler myHandler;
-
     private int SET_STATION_AS_TARGET = 2;
-    //    public String stationid="112130";
+    private Timer mtimer = null;
+    private TimerTask autofreshTask = null;
+    private ChargeStationInfo chargeStationInfo = new ChargeStationInfo();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,27 +67,25 @@ public class StationStatusActivity extends AppCompatActivity {
         text4=(TextView)findViewById(R.id.text4);
         textlon=(TextView)findViewById(R.id.textlon);
         textlat=(TextView)findViewById(R.id.textlat);
+        textcontrol=(TextView)findViewById(R.id.textcontrol);
         btn_set_target_station=(TextView)findViewById(R.id.set_target_station);
         Bundle bundle = this.getIntent().getExtras();
-
         stationid=bundle.getString("stationid");
         longitude=bundle.getString("longitude");
         latitude=bundle.getString("latitude");
         myHandler = new MyHandler();
-//        Toast.makeText(getApplicationContext(),""+longitude+" "+latitude,Toast.LENGTH_LONG).show();
+
         webrequest.Get_chargesite_info(myHandler,stationid);
-        //request();
 
         RefreshLayout refreshLayout = findViewById(R.id.refreshLayout);
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(RefreshLayout refreshlayout) {
-                Toast.makeText(getApplicationContext(), "刷新成功", Toast.LENGTH_SHORT).show();//提示用户登录失败
+                Toast.makeText(getApplicationContext(), "刷新成功", Toast.LENGTH_SHORT).show();
                 text1.setText("充电站状态：");
                 text2.setText("无人机电量：");
-                text3.setText("？？？？");
+                text3.setText("更新时间:  ");
                 text4.setText("无人机ID：");
-                //request();
                 webrequest.Get_chargesite_info(myHandler,stationid);
                 RefreshLayout refreshLayout = findViewById(R.id.refreshLayout);
                 refreshlayout.finishRefresh(50/*,false*/);//传入false表示刷新失败
@@ -93,7 +94,6 @@ public class StationStatusActivity extends AppCompatActivity {
         refreshLayout.setOnLoadmoreListener(new OnLoadmoreListener() {
             @Override
             public void onLoadmore(RefreshLayout refreshlayout) {
-//                Toast.makeText(getApplicationContext(), "11111", Toast.LENGTH_SHORT).show();//提示用户登录失败
                 refreshlayout.finishLoadmore(50/*,false*/);//传入false表示加载失败
             }
         });
@@ -105,7 +105,7 @@ public class StationStatusActivity extends AppCompatActivity {
             }
         });
 
-        timer.schedule(task, 1000, 1000); // 1s后执行task,经过1s再次执行
+        startTimer();
 
         //状态栏透明和间距处理
         StatusBarUtil.immersive(this);
@@ -122,92 +122,81 @@ public class StationStatusActivity extends AppCompatActivity {
             setResult(SET_STATION_AS_TARGET, intent);
             finish();
         }
-            //三要素
-            //stationid
-            //longitude
-            //latitude
-
-        /*
-        Intent intent = new Intent(StationStatusActivity.this, .class);
-        //                用Bundle携带数据
-        Bundle bundle = new Bundle();
-        //传递name参数为tinyphp
-
-        bundle.putString("stationid", stationid);
-        intent.putExtras(bundle);
-
-        startActivity(intent);*/
             }
         });
-
     }
 
-    Handler handler = new Handler() {
-        public void handleMessage(Message msg) {
-            if (msg.what == 1) {
-                //request();
-                webrequest.Get_chargesite_info(myHandler,stationid);
-
-                //                Toast.makeText(getApplicationContext(),Integer.toString(i++),Toast.LENGTH_SHORT).show();
-                //                tvShow.setText(Integer.toString(i++));
-            }
-            super.handleMessage(msg);
-        };
-    };
-
-    Timer timer = new Timer();
-    TimerTask task = new TimerTask() {
-
-        @Override
-        public void run() {
-            // 需要做的事:发送消息
-            Message message = new Message();
-            message.what = 1;
-            handler.sendMessage(message);
+    private void startTimer(){
+        if(mtimer == null){
+            mtimer = new Timer();
         }
-    };
+        if(autofreshTask == null){
+            autofreshTask = new TimerTask() {
+                @Override
+                public void run() {
+                    webrequest.Get_chargesite_info(myHandler,stationid);
+                }
+            };
+        }
+        if((mtimer != null)&&(autofreshTask != null)){
+            mtimer.scheduleAtFixedRate(autofreshTask,1000,1000);
+        }
+    }
+
+    private void stopTimer(){
+        if (mtimer != null) {
+            mtimer.cancel();
+            mtimer = null;
+        }
+        if(autofreshTask != null){
+            autofreshTask.cancel();
+            autofreshTask = null;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopTimer();
+    }
+
     class MyHandler extends Handler {
         public MyHandler() {
         }
-
         public MyHandler(Looper L) {
             super(L);
         }
 
-        // 子类必须重写此方法，接受数据
         @Override
         public void handleMessage(Message msg) {
             // TODO Auto-generated method stub
             super.handleMessage(msg);
-            // 此处可以更新UI
-            //Toast.makeText(getApplicationContext(),"启动",Toast.LENGTH_LONG).show();
             Bundle b = msg.getData();
-            if(b.getString("stationstatus")!=null)
-                stationstatus=b.getString("stationstatus");
-            if (b.getString("stationid")!=null && b.getString("stationid") != "0") {
-                if (b.getString("stationstatus").equals("0"))
-                    text1.setText("充电站状态： 空闲");
-                else if (b.getString("stationstatus").equals("1"))
-                    text1.setText("充电站状态： 正在充电");
-                else if (b.getString("stationstatus").equals("2"))
-                    text1.setText("充电站状态： 已充满");
-                textid.setText("充电站ID：" + b.get("stationid"));
-                text2.setText("无人机电量：" + b.get("stationpower"));
-                if (b.getString("stationstatus").equals("0"))
-                    text2.setText("无人机电量：");
+            chargeStationInfo = webrequest.chargeSiteInfoHandler(b);
+            if (chargeStationInfo.getStationId()!=null && chargeStationInfo.getStationId() != "0") {
+                textid.setText("充电站ID：" + chargeStationInfo.getStationId());
                 text3.setText("更新时间：" + b.getString("updatetime"));
-                text4.setText("无人机ID：" + b.getString("uavid"));
-                if (b.getString("uavid").equals("00000000"))
+                if (b.getString("uavid").equals("00000000")){
                     text4.setText("无人机ID：");
+                }else {
+                    text4.setText("无人机ID：" + b.getString("uavid"));
+                }
+                text2.setText("无人机电量：" + chargeStationInfo.getDronePow());
+                if (chargeStationInfo.getStationStatus().equals("0")) {
+                    text1.setText("充电站负载状态： 空闲");
+                    text2.setText("无人机电量：");
+                }
+                else if (chargeStationInfo.getStationStatus().equals("1"))
+                    text1.setText("充电站负载状态： 正在充电");
+                else if (chargeStationInfo.getStationStatus().equals("2"))
+                    text1.setText("充电站负载状态： 已充满");
                 textlon.setText("经度：" + longitude);
                 textlat.setText("纬度：" + latitude);
             }
-
             if(b.getString("IntentErr")!=null && b.getString("IntentErr").equals("1"))
             {
                 Toast.makeText(getApplicationContext(),"网络错误，请重新连结",Toast.LENGTH_LONG).show();
             }
-
         }
     }
 }

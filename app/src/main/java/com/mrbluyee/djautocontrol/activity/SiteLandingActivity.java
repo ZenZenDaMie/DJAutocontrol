@@ -229,13 +229,18 @@ public class SiteLandingActivity extends FPVActivity implements TextureView.Surf
     @Override
     public void onReturn(View view){
         Log.d(TAG, "onReturn");
+        mAutolandBtn.setChecked(false);
+        remotecontrol.DisableVirtualStick();
+        stopTimer();
         this.finish();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        mAutolandBtn.setChecked(false);
         remotecontrol.DisableVirtualStick();
+        stopTimer();
     }
 
     //OpenCV库加载并初始化成功后的回调函数

@@ -5,28 +5,19 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.util.SparseArray;
-import android.widget.Toast;
 
 import com.amap.api.maps2d.model.LatLng;
-import com.google.gson.Gson;
-import com.mrbluyee.djautocontrol.activity.FollowmeActivity;
 import com.mrbluyee.djautocontrol.utils.ChargeStationInfo;
-import com.zhy.http.okhttp.OkHttpUtils;
-import com.zhy.http.okhttp.callback.StringCallback;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import dji.thirdparty.okhttp3.FormBody;
+import dji.thirdparty.okhttp3.HttpUrl;
 import dji.thirdparty.okhttp3.MediaType;
 import dji.thirdparty.okhttp3.OkHttpClient;
 import dji.thirdparty.okhttp3.Request;
 import dji.thirdparty.okhttp3.RequestBody;
 import dji.thirdparty.okhttp3.Response;
-import okhttp3.Call;
 
 public class WebRequestApplication {
     public void Get_chargesite_gps_info(final Handler UIHandler){
@@ -38,8 +29,9 @@ public class WebRequestApplication {
                 try {
                     OkHttpClient client = new OkHttpClient();//创建OkHttpClient对象
                     Request request = new Request.Builder()
-                            .url(url)//请求接口。如果需要传参拼接到接口后面。
-                            .build();//创建Request 对象
+                        .url(url)//请求接口
+                        .get()
+                        .build();//创建Request 对象
                     Response response = null;
                     response = client.newCall(request).execute();//得到Response 对象
                     if (response.isSuccessful()) {
@@ -58,7 +50,7 @@ public class WebRequestApplication {
         }).start();
     }
 
-    public SparseArray<ChargeStationInfo> chargeStationInfoHandler(Bundle b)
+    public SparseArray<ChargeStationInfo> chargeStationgpsInfoHandler(Bundle b)
     {
         SparseArray<ChargeStationInfo> stationInfos = new SparseArray<ChargeStationInfo>();
         JSONArray station_gps_jsonArray = null;
@@ -89,49 +81,31 @@ public class WebRequestApplication {
         return stationInfos;
     }
 
-
     public void Get_chargesite_info(final Handler UIHandler,final String stationid){
         new Thread(new Runnable() {
-            //String  url = "http://139.196.138.204/tp5/public/station/readstation?stationid="+ stationid;\
             String  url = "http://139.196.138.204/tp5/public/station/readstation";
             String result = null;
             @Override
             public void run() {
                 try {
-                    OkHttpUtils
-                            .get()
-                            .url(url)
-                            .addParams("stationid", ""+stationid)
-                            .build()
-                            .execute(new StringCallback() {
-                                @Override
-                                public void onError(Call call, Exception e) {
-
-                                    Message msg = new Message();
-                                    Bundle b = new Bundle();// 存放数据
-                                    b.putString("IntentErr","1");
-                                    msg.setData(b);
-                                    UIHandler.sendMessage(msg);
-                                }
-
-                                @Override
-                                public void onResponse(String _response) {
-                                    Gson gson = new Gson();
-                                    StationBean log_respon = gson.fromJson(_response, StationBean.class);
-                                    if(log_respon.getStationid()!="0")
-                                    {
-                                        Message msg = new Message();
-                                        Bundle b = new Bundle();// 存放数据
-                                        b.putString("stationstatus",log_respon.getStationstatus());
-                                        b.putString("stationid",log_respon.getStationid());
-                                        b.putString("stationpower",log_respon.getPower());
-                                        b.putString("updatetime",log_respon.getUpdate_time());
-                                        b.putString("uavid",log_respon.getUavid());
-                                        msg.setData(b);
-                                        UIHandler.sendMessage(msg);
-                                    }
-                                }
-                            });
+                    HttpUrl.Builder urlBuilder = HttpUrl.parse(url).newBuilder();
+                    urlBuilder.addQueryParameter("stationid",stationid);
+                    OkHttpClient client = new OkHttpClient();//创建OkHttpClient对象
+                    Request request = new Request.Builder()
+                        .url(urlBuilder.build())//请求接口。
+                        .get()
+                        .build();//创建Request 对象
+                    Response response = null;
+                    response = client.newCall(request).execute();//得到Response 对象
+                    if (response.isSuccessful()) {
+                        Log.d("getinfo","response.code()=="+response.code());
+                        result = response.body().string();
+                        Message msg = new Message();
+                        Bundle b = new Bundle();// 存放数据
+                        b.putString("getinfo",result);
+                        msg.setData(b);
+                        UIHandler.sendMessage(msg);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -139,32 +113,56 @@ public class WebRequestApplication {
         }).start();
     }
 
+    public ChargeStationInfo chargeSiteInfoHandler(Bundle b)
+    {
+        ChargeStationInfo stationInfo = new ChargeStationInfo();
+        JSONObject station_info_json = null;
+        String station_info_data = b.getString("getinfo");
+        if(station_info_data != null) {
+            Log.d("MyHandler", station_info_data);
+            try {
+                station_info_json = new JSONObject(station_info_data);
+                String station_id = station_info_json.getString("stationid");
+                String uavid = station_info_json.getString("uavid");
+                String uav_pow = station_info_json.getString("power");
+                String station_create_time = station_info_json.getString("create_time");
+                String station_update_time = station_info_json.getString("update_time");
+                String station_status = station_info_json.getString("stationstatus");
+                String station_control = station_info_json.getString("stationcontrol");
+                stationInfo.setStationId(station_id);
+                stationInfo.setDroneId(uavid);
+                stationInfo.setDronePow(uav_pow);
+                stationInfo.setStation_create_time(station_create_time);
+                stationInfo.setStation_update_time(station_update_time);
+                stationInfo.setStationStatus(station_status);
+                stationInfo.setStationcontrol(station_control);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return stationInfo;
+    }
 
     public void Post_drone_info(final String droneinfo) {
         new Thread(new Runnable() {
             String url = "http://139.196.138.204/tp5/public/station/updateuav";
             String result = null;
-
             @Override
             public void run() {
                 try {
-                    OkHttpUtils
-                            .postString()
-                            .url(url)
-                            .content(droneinfo)
-                            .mediaType(okhttp3.MediaType.parse("application/x-www-form-urlencoded"))
-                            .build()
-                            .execute(new StringCallback() {
-                                @Override
-                                public void onError(Call call, Exception e) {
-                                    Log.e("MyHttpHandler", "post Error: " + e.getMessage());
-                                }
-
-                                @Override
-                                public void onResponse(String _response) {
-                                    Log.i("MyHttpHandler", "post response: " + _response);
-                                }
-                            });
+                    OkHttpClient client = new OkHttpClient();//创建OkHttpClient对象
+                    MediaType table = MediaType.parse("application/x-www-form-urlencoded");
+                    RequestBody body = RequestBody.create(table,droneinfo);
+                    Request request = new Request.Builder()
+                        .url(url)
+                        .post(body)
+                        .build();
+                    Response response = null;
+                    response = client.newCall(request).execute();//得到Response 对象
+                    if (response.isSuccessful()) {
+                        Log.d("postdroneinfo", "response.code()==" + response.code());
+                        result = response.body().string();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

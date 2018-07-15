@@ -235,35 +235,6 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
                 else{
                     Toast.makeText(this, "virtual_stick still on", Toast.LENGTH_LONG).show();
                 }
-                /*
-                Toast.makeText(this, "virtual_stick on", Toast.LENGTH_LONG).show();
-                remotecontrol.EnableVirtualStick();
-                */
-                /*
-                //使能控制
-                DJSDKApplication.getAircraftInstance().
-                        getFlightController().
-                        setVirtualStickModeEnabled(true, new CommonCallbacks.CompletionCallback() {
-                            @Override
-                            public void onResult(DJIError djiError) {
-                            }
-                        });
-                //设置飞行器坐标系和控制模式
-                DJSDKApplication.getAircraftInstance().getFlightController().
-                        setRollPitchCoordinateSystem(FlightCoordinateSystem.BODY);
-                DJSDKApplication.getAircraftInstance().getFlightController().
-                        setVerticalControlMode(VerticalControlMode.VELOCITY);
-                DJSDKApplication.getAircraftInstance().getFlightController().
-                        setYawControlMode(YawControlMode.ANGULAR_VELOCITY);
-                DJSDKApplication.getAircraftInstance().getFlightController().
-                        setRollPitchControlMode(RollPitchControlMode.VELOCITY);
-
-                //定时器用来定时，200ms发送一次数据
-                if (null == sendVirtualStickDataTimer) {
-                    sendVirtualStickDataTask = remotecontrol.new SendVirtualStickDataTask();
-                    sendVirtualStickDataTimer = new Timer();
-                    sendVirtualStickDataTimer.schedule(sendVirtualStickDataTask, 100, 200);
-                }*/
                 break;
             }
             case R.id.btn_disable_virtual_stick:{
@@ -338,28 +309,5 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
                 break;
             }
         }
-
     }
-    /*
-    //发送指令
-    private class SendVirtualStickDataTask extends TimerTask {
-
-        @Override
-        public void run() {
-            if (ModuleVerificationUtil.isFlightControllerAvailable()) {
-                DJSDKApplication.getAircraftInstance()
-                        .getFlightController()
-                        .sendVirtualStickFlightControlData(new FlightControlData(pitch,
-                                        roll,
-                                        yaw,
-                                        throttle),
-                                new CommonCallbacks.CompletionCallback() {
-                                    @Override
-                                    public void onResult(DJIError djiError) {
-
-                                    }
-                                });
-            }
-        }
-    }*/
 }
