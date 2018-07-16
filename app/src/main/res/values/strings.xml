@@ -16,5 +16,6 @@
     <string name="automatic_handle">Automatic</string>
     <string name="gps_map">GPS map view</string>
     <string name="push_info">Push Info</string>
+    <string name="drone_id">880498DC</string>
     <string name="copy_right">The Copyright of the Evil Fish Studio</string>
 </resources>

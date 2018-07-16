@@ -2,6 +2,7 @@ package com.mrbluyee.djautocontrol.activity;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -40,6 +41,7 @@ import com.mrbluyee.djautocontrol.application.RemoteControlApplication;
  */
 
 public class RemoteControlActivity extends MainActivity implements View.OnClickListener{
+    private static final String TAG = RemoteControlActivity.class.getName();
     private boolean yawControlModeFlag = true;
 
     private RemoteControlApplication remotecontrol= new RemoteControlApplication (this);
@@ -174,13 +176,13 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
 
                 if (horizontalCoordinateFlag) {
                     if (rollPitchControlModeFlag) {
-                        remotecontrol.pitch = (float) (pitchJoyControlMaxSpeed * pX);
+                        remotecontrol.Pitch = (float) (pitchJoyControlMaxSpeed * pX);
 
-                        remotecontrol.roll = (float) (rollJoyControlMaxSpeed * pY);
+                        remotecontrol.Roll = (float) (rollJoyControlMaxSpeed * pY);
                     } else {
-                        remotecontrol.pitch = -(float) (pitchJoyControlMaxSpeed * pY);
+                        remotecontrol.Pitch = -(float) (pitchJoyControlMaxSpeed * pY);
 
-                        remotecontrol.roll = (float) (rollJoyControlMaxSpeed * pX);
+                        remotecontrol.Roll = (float) (rollJoyControlMaxSpeed * pX);
                     }
                 }
 
@@ -207,8 +209,8 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
                 float verticalJoyControlMaxSpeed = 2;
                 float yawJoyControlMaxSpeed = 3;
 
-                remotecontrol.yaw = yawJoyControlMaxSpeed * pX;
-                remotecontrol.throttle = verticalJoyControlMaxSpeed * pY;
+                remotecontrol.Yaw = yawJoyControlMaxSpeed * pX;
+                remotecontrol.Throttle = verticalJoyControlMaxSpeed * pY;
 
                 if (null == remotecontrol.sendVirtualStickDataTimer) {
                     sendVirtualStickDataTask = remotecontrol.new SendVirtualStickDataTask();
@@ -233,35 +235,6 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
                 else{
                     Toast.makeText(this, "virtual_stick still on", Toast.LENGTH_LONG).show();
                 }
-                /*
-                Toast.makeText(this, "virtual_stick on", Toast.LENGTH_LONG).show();
-                remotecontrol.EnableVirtualStick();
-                */
-                /*
-                //使能控制
-                DJSDKApplication.getAircraftInstance().
-                        getFlightController().
-                        setVirtualStickModeEnabled(true, new CommonCallbacks.CompletionCallback() {
-                            @Override
-                            public void onResult(DJIError djiError) {
-                            }
-                        });
-                //设置飞行器坐标系和控制模式
-                DJSDKApplication.getAircraftInstance().getFlightController().
-                        setRollPitchCoordinateSystem(FlightCoordinateSystem.BODY);
-                DJSDKApplication.getAircraftInstance().getFlightController().
-                        setVerticalControlMode(VerticalControlMode.VELOCITY);
-                DJSDKApplication.getAircraftInstance().getFlightController().
-                        setYawControlMode(YawControlMode.ANGULAR_VELOCITY);
-                DJSDKApplication.getAircraftInstance().getFlightController().
-                        setRollPitchControlMode(RollPitchControlMode.VELOCITY);
-
-                //定时器用来定时，200ms发送一次数据
-                if (null == sendVirtualStickDataTimer) {
-                    sendVirtualStickDataTask = remotecontrol.new SendVirtualStickDataTask();
-                    sendVirtualStickDataTimer = new Timer();
-                    sendVirtualStickDataTimer.schedule(sendVirtualStickDataTask, 100, 200);
-                }*/
                 break;
             }
             case R.id.btn_disable_virtual_stick:{
@@ -296,71 +269,45 @@ public class RemoteControlActivity extends MainActivity implements View.OnClickL
             }
             case R.id.btn_up:{
                 Toast.makeText(this, "start up", Toast.LENGTH_LONG).show();
-                if(remotecontrol.lock==false) {
-                    remotecontrol.Up(1000, 10000);
-                }
+                remotecontrol.Up(0.5f,1000);
                 //roll=(float)(roll+1);
                 break;
             }
             case R.id.btn_down:{
                 Toast.makeText(this, "start down", Toast.LENGTH_LONG).show();
-                remotecontrol.Down(1000,2000);
-                /*if (throttle > 1) {
-                    throttle = throttle - 1;
-                }
-                */
+                remotecontrol.Down(0.5f,1000);
                 break;
             }
             case R.id.btn_left_turn:{
-                if(remotecontrol.lock==false){
-                    remotecontrol.turn_left(1000,10000);
-                }
+                remotecontrol.turn_left(1000);
+                Log.d(TAG, "turn left");
                 break;
             }
             case R.id.btn_right_turn:{
-                remotecontrol.turn_right(1000,2000);
+                remotecontrol.turn_right(1000);
+                Log.d(TAG, "turn right");
                 break;
             }
             case R.id.btn_ahead_move:{
-                remotecontrol.ahead_move(1000,2000);
-                //remotecontrol.
+                remotecontrol.ahead_move(0.5f,1000);
+                Log.d(TAG, "ahead move");
                 break;
             }
             case R.id.btn_back_move: {
-                remotecontrol.back_move(1000,2000);
+                remotecontrol.back_move(0.5f,1000);
+                Log.d(TAG, "back move");
                 break;
             }
             case R.id.btn_left_move:{
-                remotecontrol.left_move(1000,2000);
+                remotecontrol.left_move(0.5f,1000);
+                Log.d(TAG, "left move");
                 break;
             }
             case R.id.btn_right_move:{
-                remotecontrol.right_move(1000,2000);
+                remotecontrol.right_move(0.5f,1000);
+                Log.d(TAG, "right move");
                 break;
             }
         }
-
     }
-    /*
-    //发送指令
-    private class SendVirtualStickDataTask extends TimerTask {
-
-        @Override
-        public void run() {
-            if (ModuleVerificationUtil.isFlightControllerAvailable()) {
-                DJSDKApplication.getAircraftInstance()
-                        .getFlightController()
-                        .sendVirtualStickFlightControlData(new FlightControlData(pitch,
-                                        roll,
-                                        yaw,
-                                        throttle),
-                                new CommonCallbacks.CompletionCallback() {
-                                    @Override
-                                    public void onResult(DJIError djiError) {
-
-                                    }
-                                });
-            }
-        }
-    }*/
 }

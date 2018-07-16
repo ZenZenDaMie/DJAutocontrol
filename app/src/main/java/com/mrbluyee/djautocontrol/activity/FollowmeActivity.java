@@ -94,25 +94,30 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
     private MapView mapView;
     private AMap aMap;
 
-    private Button locate, searh_site, gosite;
+    private Button locate, searh_site, gosite,stopmission;
 
     private double droneLocationLat = 121.40533301729, droneLocationLng = 31.322594332605;
+    private double droneStartLat,droneStartLng;
     private final Map<Integer, Marker> mMarkers = new ConcurrentHashMap<Integer, Marker>();
     private Marker droneMarker = null;
 
     private float altitude = 10.0f;
     private FlightController mFlightController;
-    private FollowMeMission mission;
-    private FollowMeHeading mHeading = FollowMeHeading.TOWARD_FOLLOW_POSITION;
-    private FollowMeMissionOperator instance;
+    private FollowMeMissionOperator followMeMissionOperator;
     private LocationCoordinate2D movingObjectLocation;
     private AtomicBoolean isRunning = new AtomicBoolean(false);
-    private Subscription timmerSubcription;
+    private Subscription timmerSubcription = null;
     private Observable<Long> timer =Observable.timer(100, TimeUnit.MILLISECONDS).observeOn(Schedulers.computation()).repeat();
     private MyHandler myHandler;
 
     public SparseArray<ChargeStationInfo> stationInfos = new SparseArray<ChargeStationInfo>();
     private WebRequestApplication webrequest = new WebRequestApplication();
+
+    private int STATION_STATUS_CODE = 1;
+    private int SET_STATION_AS_TARGET = 2;
+
+    private double latitude_1cm = 1.141255544679108e-5/100;
+    private double longitude_1cm = 8.993216192195822e-6/100;
 
     @Override
     protected void onResume(){
@@ -150,14 +155,15 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
     }
 
     private void initUI() {
-
         locate = (Button) findViewById(R.id.locate);
         searh_site = (Button) findViewById(R.id.followme_search);
         gosite = (Button) findViewById(R.id.followme_gosite);
+        stopmission = (Button) findViewById(R.id.followme_stopmission);
 
         locate.setOnClickListener(this);
         searh_site.setOnClickListener(this);
         gosite.setOnClickListener(this);
+        stopmission.setOnClickListener(this);
     }
 
     private void initMapView() {
@@ -188,8 +194,8 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
         mapView.onCreate(savedInstanceState);
         initMapView();
         initUI();
-        addListener();
         initFlightController();
+        addListener();
         myHandler = new MyHandler();
     }
 
@@ -208,7 +214,7 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
             super.handleMessage(msg);
             // 此处可以更新UI
             Bundle b = msg.getData();
-            SparseArray<ChargeStationInfo> stationInfos_temp = webrequest.chargeStationInfoHandler(b);
+            SparseArray<ChargeStationInfo> stationInfos_temp = webrequest.chargeStationgpsInfoHandler(b);
             for(int i = 0;i<stationInfos_temp.size();i++){
                 int station_id = stationInfos_temp.keyAt(i);
                 ChargeStationInfo updatetationInfo = stationInfos_temp.valueAt(i);
@@ -225,14 +231,14 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
 
     //Add Listener for WaypointMissionOperator
     private void addListener() {
-        if (getFollowMeMissionOperator() != null) {
-            getFollowMeMissionOperator().addListener(eventNotificationListener);
+        if (followMeMissionOperator != null) {
+            followMeMissionOperator.addListener(eventNotificationListener);
         }
     }
 
     private void removeListener() {
-        if (getFollowMeMissionOperator() != null) {
-            getFollowMeMissionOperator().removeListener(eventNotificationListener);
+        if (followMeMissionOperator != null) {
+            followMeMissionOperator.removeListener(eventNotificationListener);
         }
     }
 
@@ -273,7 +279,7 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
                 new CommonCallbacks.CompletionCallbackWith<UserAccountState>() {
                     @Override
                     public void onSuccess(final UserAccountState userAccountState) {
-                        Log.e(TAG, "Login Success");
+                        Log.i(TAG, "Login Success");
                     }
                     @Override
                     public void onFailure(DJIError error) {
@@ -305,14 +311,8 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
                         }
                     });
 
+            followMeMissionOperator = DJISDKManager.getInstance().getMissionControl().getFollowMeMissionOperator();
         }
-    }
-
-    public FollowMeMissionOperator getFollowMeMissionOperator() {
-        if (instance == null) {
-            instance = DJISDKManager.getInstance().getMissionControl().getFollowMeMissionOperator();
-        }
-        return instance;
     }
 
     public static boolean checkGpsCoordination(double latitude, double longitude) {
@@ -370,6 +370,10 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
                 followMeStart();
                 break;
             }
+            case R.id.followme_stopmission:{
+                followmeStop();
+                break;
+            }
             default:
                 break;
         }
@@ -386,58 +390,40 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
         // 返回 true 则表示接口已响应事件，否则返回false
         @Override
         public boolean onMarkerClick(Marker marker) {
-            /*
+        if(marker.getTitle().equals("charge station")){
             int id = Integer.parseInt(marker.getSnippet());
-            ChargeStationInfo chargeStationInfo = stationInfos.valueAt(station_index);
-
-            LatLng station_location = chargeStationInfo.getStationPos();
-
-            Toast.makeText(getApplicationContext(),id+" "+station_index, Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(getApplicationContext(), StationStatusActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putString("stationid",""+id);
-            bundle.putString("longitude",""+station_location.latitude);
-            bundle.putString("latitude",""+station_location.longitude);
-            startActivity(intent);*/
-
-            if(marker.getTitle().equals("charge station")){
-                int id = Integer.parseInt(marker.getSnippet());
-                int station_index = stationInfos.indexOfKey(id);
-
-                if (station_index != -1) {
-
-                    //Toast.makeText(getApplicationContext(),id+" "+station_index, Toast.LENGTH_LONG).show();
-
-
-                    if (aMap != null) {
-                        ChargeStationInfo chargeStationInfo = stationInfos.valueAt(station_index);
-                        LatLng station_location = chargeStationInfo.getStationPos();
-                        Intent intent = new Intent(FollowmeActivity.this, StationStatusActivity.class);
-
-                        Bundle bundle = new Bundle();
-                        bundle.putString("stationid",""+id);
-                        bundle.putString("longitude",""+station_location.longitude);
-                        bundle.putString("latitude",""+station_location.latitude);
-                        intent.putExtras(bundle);
-
-                        startActivity(intent);
-
-                        //Intent intent = new Intent(getApplicationContext(), StationStatusActivity.class);
-/*
-                        Bundle bundle = new Bundle();
-                        bundle.putString("stationid",""+id);
-                        bundle.putString("longitude",""+station_location.latitude);
-                        bundle.putString("latitude",""+station_location.longitude);*/
-                        //startActivity(intent);
-                        /*
-                        bundle.putString("longitude",""+marker.getPosition().longitude);
-                        bundle.putString("latitude",""+marker.getPosition().latitude);*/
-                    }
+            int station_index = stationInfos.indexOfKey(id);
+            if (station_index != -1) {
+                if (aMap != null) {
+                    ChargeStationInfo chargeStationInfo = stationInfos.valueAt(station_index);
+                    LatLng station_location = chargeStationInfo.getStationPos();
+                    Intent intent = new Intent(FollowmeActivity.this, StationStatusActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("stationid",""+id);
+                    bundle.putString("longitude",""+station_location.longitude);
+                    bundle.putString("latitude",""+station_location.latitude);
+                    intent.putExtras(bundle);
+                    startActivityForResult(intent, STATION_STATUS_CODE);
                 }
             }
-            return false;
+        }
+        return false;
         }
     };
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode ==  STATION_STATUS_CODE){
+            if(resultCode == SET_STATION_AS_TARGET){
+                int target_station_id = Integer.parseInt(data.getStringExtra("station_id"));
+                ChargeStationInfo chargeStationInfo = stationInfos.get(target_station_id);
+                LatLng gps_point = AmapToGpsUtil.toGPSPoint(chargeStationInfo.getStationPos().latitude,chargeStationInfo.getStationPos().longitude);
+                movingObjectLocation = new LocationCoordinate2D(gps_point.latitude,gps_point.longitude);
+                setResultToToast("Set target addr: charge station "+ target_station_id);
+            }
+        }
+    }
 
     private void cameraUpdate(){
         LatLng pos = gps_converter(new LatLng(droneLocationLat, droneLocationLng));
@@ -447,32 +433,67 @@ public class FollowmeActivity extends FragmentActivity implements View.OnClickLi
     }
 
     private void followMeStart(){
-        if (getFollowMeMissionOperator().getCurrentState().toString().equals(FollowMeMissionState.READY_TO_EXECUTE.toString())){
-            //ToDo: You need init or get the location of your moving object which will be followed by the aircraft.
-
-            getFollowMeMissionOperator().startMission(FollowMeMission.getInstance().initUserData(movingObjectLocation.getLatitude() , movingObjectLocation.getLongitude(), altitude), new CommonCallbacks.CompletionCallback() {
-                @Override
-                public void onResult(DJIError djiError) {
-                    setResultToToast("Mission Start: " + (djiError == null ? "Successfully" : djiError.getDescription()));
-                }});
-
-            if (!isRunning.get()) {
-                isRunning.set(true);
-                timmerSubcription = timer.subscribe(new Action1<Long>() {
-                    @Override
-                    public void call(Long aLong) {
-                        getFollowMeMissionOperator().updateFollowingTarget(new LocationCoordinate2D(movingObjectLocation.getLatitude(), movingObjectLocation.getLongitude()),
-                                new CommonCallbacks.CompletionCallback() {
-                                    @Override
-                                    public void onResult(DJIError error) {
-                                        isRunning.set(false);
+        if(followMeMissionOperator != null) {
+            if (followMeMissionOperator.getCurrentState().toString().equals(FollowMeMissionState.READY_TO_EXECUTE.toString())) {
+                //ToDo: You need init or get the location of your moving object which will be followed by the aircraft.
+                if(movingObjectLocation != null) {
+                    droneStartLat = droneLocationLat;
+                    droneStartLng = droneLocationLng;
+                    followMeMissionOperator.startMission(FollowMeMission.getInstance().initUserData(droneStartLat, droneStartLng, altitude), new CommonCallbacks.CompletionCallback() {
+                        @Override
+                        public void onResult(DJIError djiError) {
+                            setResultToToast("Mission Start: " + (djiError == null ? "Successfully" : djiError.getDescription()));
+                        }
+                    });
+                    if (!isRunning.get()) {
+                        isRunning.set(true);
+                        timmerSubcription = timer.subscribe(new Action1<Long>() {
+                            @Override
+                            public void call(Long aLong) {
+                                if(movingObjectLocation != null) {
+                                    double now_latitude_different = (droneStartLat - movingObjectLocation.getLatitude())/latitude_1cm;
+                                    double now_longitude_different = (droneStartLng -movingObjectLocation.getLongitude())/longitude_1cm;
+                                    if(now_latitude_different < -10){
+                                        droneStartLat += latitude_1cm*10;
+                                    }else if(now_latitude_different > 10){
+                                        droneStartLat -= latitude_1cm*10;
                                     }
-                                });
+                                    if(now_longitude_different < -10){
+                                        droneStartLng += longitude_1cm*10;
+                                    }else if(now_longitude_different > 10){
+                                        droneStartLng -= longitude_1cm*10;
+                                    }
+                                    followMeMissionOperator.updateFollowingTarget(new LocationCoordinate2D(droneStartLat, droneStartLng),
+                                            new CommonCallbacks.CompletionCallback() {
+                                                @Override
+                                                public void onResult(DJIError error) {
+                                                    isRunning.set(false);
+                                                }
+                                            });
+                                }
+                            }
+                        });
+                    }
+                }
+            } else {
+                setResultToToast(followMeMissionOperator.getCurrentState().toString());
+            }
+        }
+    }
+
+    private void followmeStop(){
+        if(followMeMissionOperator != null){
+            if (followMeMissionOperator.getCurrentState().toString().equals(FollowMeMissionState.EXECUTING.toString())) {
+                //ToDo: You need init or get the location of your moving object which will be followed by the aircraft.
+                followMeMissionOperator.stopMission(new CommonCallbacks.CompletionCallback() {
+                    @Override
+                    public void onResult(DJIError djiError) {
+                        setResultToToast("Mission Stop: " + (djiError == null ? "Successfully" : djiError.getDescription()));
                     }
                 });
+            } else {
+                setResultToToast(followMeMissionOperator.getCurrentState().toString());
             }
-        } else{
-            Toast.makeText(getApplicationContext(), getFollowMeMissionOperator().getCurrentState().toString(), Toast.LENGTH_SHORT).show();
         }
     }
 }

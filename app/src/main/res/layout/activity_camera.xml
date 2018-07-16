@@ -24,6 +24,13 @@
             android:scaleType="fitXY"
             android:src="@drawable/visual_track_highconfidence"
             android:visibility="invisible" />
+        <ImageView
+            android:id="@+id/camera_tracking_small_rect"
+            android:layout_width="150dp"
+            android:layout_height="100dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/visual_point_now"
+            android:visibility="invisible" />
     </RelativeLayout>
 
     <RelativeLayout

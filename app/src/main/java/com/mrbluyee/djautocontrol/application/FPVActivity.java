@@ -78,7 +78,7 @@ public class FPVActivity extends Activity implements SurfaceTextureListener{
             }
         };
         camera = DJSDKApplication.getCameraInstance();
-        if(camera != null){
+        if(camera != null) {
             camera.setMode(SettingsDefinitions.CameraMode.RECORD_VIDEO, new CommonCallbacks.CompletionCallback() {
                 @Override
                 public void onResult(DJIError error) {
@@ -87,6 +87,12 @@ public class FPVActivity extends Activity implements SurfaceTextureListener{
                     } else {
                         Log.e(TAG, error.getDescription());
                     }
+                }
+            });
+            camera.setFocusMode(SettingsDefinitions.FocusMode.AFC, new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError error) {
+                    Log.i(TAG, "Set focus Mode: " + (error == null ? "AFC success" : error.getDescription()));
                 }
             });
         }
