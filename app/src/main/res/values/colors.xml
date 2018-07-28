@@ -8,5 +8,6 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorTextTitle">#333333</color>
+    <color name="aaaaBlue">#0080ff</color>
 
 </resources>

@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.view.View.OnClickListener;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import dji.common.error.DJIError;
@@ -18,15 +19,15 @@ import dji.sdk.useraccount.UserAccountManager;
 import com.mrbluyee.djautocontrol.R;
 
 public class MainActivity extends Activity implements OnClickListener{
-    private Button drone_status_btn;
-    private Button camera_fpv_btn;
-    private Button remote_control_btn;
-    private Button gps_track_btn;
-    private Button gps_route_btn;
-    private Button static_track_btn;
-    private Button moving_track_btn;
-    private Button site_landing_btn;
-    private Button automatic_handle_btn;
+    private TextView drone_status_btn;
+    private TextView camera_fpv_btn;
+    private TextView remote_control_btn;
+    private TextView gps_track_btn;
+    private TextView gps_route_btn;
+    private TextView static_track_btn;
+    private TextView moving_track_btn;
+    private TextView site_landing_btn;
+    private TextView automatic_handle_btn;
     private static final String TAG = MainActivity.class.getName();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,15 +43,15 @@ public class MainActivity extends Activity implements OnClickListener{
         loginAccount();
     }
     private void initUI(){
-        drone_status_btn = (Button) findViewById(R.id.drone_status_button);
-        camera_fpv_btn = (Button) findViewById(R.id.camera_fpv_button);
-        remote_control_btn = (Button) findViewById(R.id.remote_control_button);
-        gps_track_btn = (Button) findViewById(R.id.gps_track_button);
-        gps_route_btn = (Button) findViewById(R.id.gps_route_button);
-        static_track_btn = (Button) findViewById(R.id.static_track_button);
-        moving_track_btn = (Button) findViewById(R.id.moving_track_button);
-        site_landing_btn = (Button) findViewById(R.id.site_landing_button);
-        automatic_handle_btn = (Button) findViewById(R.id.automatic_handle_button);
+        drone_status_btn = (TextView) findViewById(R.id.drone_status_button);
+        camera_fpv_btn = (TextView) findViewById(R.id.camera_fpv_button);
+        remote_control_btn = (TextView) findViewById(R.id.remote_control_button);
+        gps_track_btn = (TextView) findViewById(R.id.gps_track_button);
+        gps_route_btn = (TextView) findViewById(R.id.gps_route_button);
+        static_track_btn = (TextView) findViewById(R.id.static_track_button);
+        moving_track_btn = (TextView) findViewById(R.id.moving_track_button);
+        site_landing_btn = (TextView) findViewById(R.id.site_landing_button);
+        automatic_handle_btn = (TextView) findViewById(R.id.automatic_handle_button);
 
         drone_status_btn.setOnClickListener(this);
         camera_fpv_btn.setOnClickListener(this);
